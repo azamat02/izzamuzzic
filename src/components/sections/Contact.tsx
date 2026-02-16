@@ -26,10 +26,10 @@ export function Contact() {
                 Booking Inquiries
               </h3>
               <a
-                href="mailto:booking@izzamuzzic.com"
+                href="mailto:izzamuzzic.mgmt@gmail.com"
                 className="text-[#a0a0a0] hover:text-[#e63946] transition-colors text-lg"
               >
-                booking@izzamuzzic.com
+                izzamuzzic.mgmt@gmail.com
               </a>
             </div>
 
@@ -39,10 +39,10 @@ export function Contact() {
                 Management
               </h3>
               <a
-                href="mailto:management@izzamuzzic.com"
+                href="mailto:izzamuzzic.mgmt@gmail.com"
                 className="text-[#a0a0a0] hover:text-[#e63946] transition-colors text-lg"
               >
-                management@izzamuzzic.com
+                izzamuzzic.mgmt@gmail.com
               </a>
             </div>
 
@@ -52,10 +52,10 @@ export function Contact() {
                 Press & Media
               </h3>
               <a
-                href="mailto:press@izzamuzzic.com"
+                href="mailto:izzamuzzic.mgmt@gmail.com"
                 className="text-[#a0a0a0] hover:text-[#e63946] transition-colors text-lg"
               >
-                press@izzamuzzic.com
+                izzamuzzic.mgmt@gmail.com
               </a>
             </div>
           </motion.div>

@@ -1,4 +1,4 @@
-import { FaSpotify, FaYoutube, FaInstagram, FaSoundcloud } from 'react-icons/fa';
+import { FaSpotify, FaYoutube, FaInstagram, FaSoundcloud, FaTelegram } from 'react-icons/fa';
 import type { IconType } from 'react-icons';
 
 export interface Social {
@@ -27,5 +27,10 @@ export const socials: Social[] = [
     name: 'SoundCloud',
     url: 'https://soundcloud.com/izzamuzzic',
     icon: FaSoundcloud,
+  },
+  {
+    name: 'Telegram',
+    url: 'https://t.me/izzzzzzzzzzzzzzza',
+    icon: FaTelegram,
   },
 ];

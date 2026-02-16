@@ -6,10 +6,10 @@ import { SocialLinks } from '../ui/SocialLinks';
 const navItems = [
   { label: 'Music', href: '#music' },
   { label: 'About', href: '#about' },
-  { label: 'Tour', href: '#tour' },
+  
   { label: 'Gallery', href: '#gallery' },
   { label: 'Merch', href: '#merch' },
-  { label: 'Press', href: '#press' },
+  
   { label: 'Contact', href: '#contact' },
 ];
 
