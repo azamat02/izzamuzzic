@@ -27,8 +27,6 @@ dist-ssr
 .claude
 .playwright-mcp
 
-# Large video files
-*.mp4
 
 .vercel
 .env
