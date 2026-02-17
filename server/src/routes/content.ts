@@ -34,7 +34,7 @@ router.get('/releases', (_req, res) => {
 });
 
 router.get('/releases/:id', (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   const item = db.select().from(schema.releases).where(eq(schema.releases.id, id)).get();
   if (!item) {
     res.status(404).json({ error: 'Release not found' });
@@ -53,14 +53,14 @@ router.post('/releases', authMiddleware, (req, res) => {
 });
 
 router.put('/releases/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.update(schema.releases).set(req.body).where(eq(schema.releases.id, id)).run();
   const data = db.select().from(schema.releases).where(eq(schema.releases.id, id)).get();
   res.json(data);
 });
 
 router.delete('/releases/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.delete(schema.releaseLinks).where(eq(schema.releaseLinks.releaseId, id)).run();
   db.delete(schema.releases).where(eq(schema.releases.id, id)).run();
   res.json({ success: true });
@@ -68,7 +68,7 @@ router.delete('/releases/:id', authMiddleware, (req, res) => {
 
 // ============ RELEASE LINKS ============
 router.post('/releases/:id/links', authMiddleware, (req, res) => {
-  const releaseId = parseInt(req.params.id);
+  const releaseId = parseInt(req.params.id as string);
   const result = db.insert(schema.releaseLinks)
     .values({ ...req.body, releaseId })
     .returning()
@@ -77,14 +77,14 @@ router.post('/releases/:id/links', authMiddleware, (req, res) => {
 });
 
 router.put('/release-links/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.update(schema.releaseLinks).set(req.body).where(eq(schema.releaseLinks.id, id)).run();
   const data = db.select().from(schema.releaseLinks).where(eq(schema.releaseLinks.id, id)).get();
   res.json(data);
 });
 
 router.delete('/release-links/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.delete(schema.releaseLinks).where(eq(schema.releaseLinks.id, id)).run();
   res.json({ success: true });
 });
@@ -118,14 +118,14 @@ router.post('/gallery', authMiddleware, (req, res) => {
 });
 
 router.put('/gallery/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.update(schema.galleryImages).set(req.body).where(eq(schema.galleryImages.id, id)).run();
   const data = db.select().from(schema.galleryImages).where(eq(schema.galleryImages.id, id)).get();
   res.json(data);
 });
 
 router.delete('/gallery/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.delete(schema.galleryImages).where(eq(schema.galleryImages.id, id)).run();
   res.json({ success: true });
 });
@@ -144,7 +144,7 @@ router.get('/merch', (_req, res) => {
 });
 
 router.get('/merch/:id', (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   const item = db.select().from(schema.merchItems).where(eq(schema.merchItems.id, id)).get();
   if (!item) {
     res.status(404).json({ error: 'Merch item not found' });
@@ -167,14 +167,14 @@ router.post('/merch', authMiddleware, (req, res) => {
 });
 
 router.put('/merch/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.update(schema.merchItems).set(req.body).where(eq(schema.merchItems.id, id)).run();
   const data = db.select().from(schema.merchItems).where(eq(schema.merchItems.id, id)).get();
   res.json(data);
 });
 
 router.delete('/merch/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.delete(schema.merchItemVariants).where(eq(schema.merchItemVariants.merchItemId, id)).run();
   db.delete(schema.merchItemImages).where(eq(schema.merchItemImages.merchItemId, id)).run();
   db.delete(schema.merchItems).where(eq(schema.merchItems.id, id)).run();
@@ -183,7 +183,7 @@ router.delete('/merch/:id', authMiddleware, (req, res) => {
 
 // ============ MERCH IMAGES ============
 router.get('/merch/:id/images', (req, res) => {
-  const merchItemId = parseInt(req.params.id);
+  const merchItemId = parseInt(req.params.id as string);
   const data = db.select().from(schema.merchItemImages)
     .where(eq(schema.merchItemImages.merchItemId, merchItemId))
     .orderBy(asc(schema.merchItemImages.sortOrder))
@@ -192,7 +192,7 @@ router.get('/merch/:id/images', (req, res) => {
 });
 
 router.post('/merch/:id/images', authMiddleware, (req, res) => {
-  const merchItemId = parseInt(req.params.id);
+  const merchItemId = parseInt(req.params.id as string);
   const result = db.insert(schema.merchItemImages)
     .values({ ...req.body, merchItemId })
     .returning()
@@ -201,14 +201,14 @@ router.post('/merch/:id/images', authMiddleware, (req, res) => {
 });
 
 router.delete('/merch-images/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.delete(schema.merchItemImages).where(eq(schema.merchItemImages.id, id)).run();
   res.json({ success: true });
 });
 
 // ============ MERCH VARIANTS ============
 router.post('/merch/:id/variants', authMiddleware, (req, res) => {
-  const merchItemId = parseInt(req.params.id);
+  const merchItemId = parseInt(req.params.id as string);
   const result = db.insert(schema.merchItemVariants)
     .values({ ...req.body, merchItemId })
     .returning()
@@ -217,14 +217,14 @@ router.post('/merch/:id/variants', authMiddleware, (req, res) => {
 });
 
 router.put('/merch-variants/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.update(schema.merchItemVariants).set(req.body).where(eq(schema.merchItemVariants.id, id)).run();
   const data = db.select().from(schema.merchItemVariants).where(eq(schema.merchItemVariants.id, id)).get();
   res.json(data);
 });
 
 router.delete('/merch-variants/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.delete(schema.merchItemVariants).where(eq(schema.merchItemVariants.id, id)).run();
   res.json({ success: true });
 });
@@ -241,14 +241,14 @@ router.post('/tours', authMiddleware, (req, res) => {
 });
 
 router.put('/tours/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.update(schema.tourDates).set(req.body).where(eq(schema.tourDates.id, id)).run();
   const data = db.select().from(schema.tourDates).where(eq(schema.tourDates.id, id)).get();
   res.json(data);
 });
 
 router.delete('/tours/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.delete(schema.tourDates).where(eq(schema.tourDates.id, id)).run();
   res.json({ success: true });
 });
@@ -265,14 +265,14 @@ router.post('/press', authMiddleware, (req, res) => {
 });
 
 router.put('/press/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.update(schema.pressItems).set(req.body).where(eq(schema.pressItems.id, id)).run();
   const data = db.select().from(schema.pressItems).where(eq(schema.pressItems.id, id)).get();
   res.json(data);
 });
 
 router.delete('/press/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.delete(schema.pressItems).where(eq(schema.pressItems.id, id)).run();
   res.json({ success: true });
 });
@@ -289,14 +289,14 @@ router.post('/contact-categories', authMiddleware, (req, res) => {
 });
 
 router.put('/contact-categories/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.update(schema.contactCategories).set(req.body).where(eq(schema.contactCategories.id, id)).run();
   const data = db.select().from(schema.contactCategories).where(eq(schema.contactCategories.id, id)).get();
   res.json(data);
 });
 
 router.delete('/contact-categories/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.delete(schema.contactCategories).where(eq(schema.contactCategories.id, id)).run();
   res.json({ success: true });
 });
@@ -330,14 +330,14 @@ router.post('/socials', authMiddleware, (req, res) => {
 });
 
 router.put('/socials/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.update(schema.socialLinks).set(req.body).where(eq(schema.socialLinks.id, id)).run();
   const data = db.select().from(schema.socialLinks).where(eq(schema.socialLinks.id, id)).get();
   res.json(data);
 });
 
 router.delete('/socials/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.delete(schema.socialLinks).where(eq(schema.socialLinks.id, id)).run();
   res.json({ success: true });
 });
@@ -354,14 +354,14 @@ router.post('/navigation', authMiddleware, (req, res) => {
 });
 
 router.put('/navigation/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.update(schema.navigationItems).set(req.body).where(eq(schema.navigationItems.id, id)).run();
   const data = db.select().from(schema.navigationItems).where(eq(schema.navigationItems.id, id)).get();
   res.json(data);
 });
 
 router.delete('/navigation/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   db.delete(schema.navigationItems).where(eq(schema.navigationItems.id, id)).run();
   res.json({ success: true });
 });
@@ -437,7 +437,7 @@ router.post('/orders', (req, res) => {
 
 // Public: check order status
 router.get('/orders/:id/status', (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   const order = db.select({ status: schema.orders.status }).from(schema.orders).where(eq(schema.orders.id, id)).get();
   if (!order) {
     res.status(404).json({ error: 'Order not found' });
@@ -459,7 +459,7 @@ router.get('/orders', authMiddleware, (_req, res) => {
 
 // Admin: get single order
 router.get('/orders/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   const order = db.select().from(schema.orders).where(eq(schema.orders.id, id)).get();
   if (!order) {
     res.status(404).json({ error: 'Order not found' });
@@ -471,7 +471,7 @@ router.get('/orders/:id', authMiddleware, (req, res) => {
 
 // Admin: update order (status, note)
 router.put('/orders/:id', authMiddleware, (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   const { status, note } = req.body;
   const updates: Record<string, any> = {};
   if (status !== undefined) updates.status = status;
