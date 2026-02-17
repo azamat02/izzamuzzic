@@ -31,3 +31,8 @@ dist-ssr
 *.mp4
 
 .vercel
+
+# Server
+server/uploads/*
+!server/uploads/.gitkeep
+server/data.db
