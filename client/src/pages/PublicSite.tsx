@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import { Hero } from '../components/sections/Hero';
@@ -9,8 +9,6 @@ import { Merch } from '../components/sections/Merch';
 import { Contact } from '../components/sections/Contact';
 import { Tour } from '../components/sections/Tour';
 import { Press } from '../components/sections/Press';
-import { Preloader } from '../components/ui/Preloader';
-import { usePreloadFrames } from '../hooks/usePreloadFrames';
 import { usePublicData } from '../hooks/useApi';
 
 interface NavigationItem {
@@ -21,10 +19,7 @@ interface NavigationItem {
   sortOrder: number;
 }
 
-const TOTAL_FRAMES = 121;
-
 export function PublicSite() {
-  const { isLoaded, progress } = usePreloadFrames(TOTAL_FRAMES, '/frames');
   const { data: navItems } = usePublicData<NavigationItem[]>('navigation', '/navigation');
 
   const isSectionVisible = (href: string) => {
@@ -34,37 +29,23 @@ export function PublicSite() {
   };
 
   return (
-    <>
-      <AnimatePresence>
-        {!isLoaded && (
-          <motion.div
-            key="preloader"
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Preloader progress={progress} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isLoaded ? 1 : 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Header />
-        <main>
-          <Hero />
-          <Music />
-          <About />
-          {isSectionVisible('#tour') && <Tour />}
-          <Gallery />
-          <Merch />
-          {isSectionVisible('#press') && <Press />}
-          <Contact />
-        </main>
-        <Footer />
-      </motion.div>
-    </>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Header />
+      <main>
+        <Hero />
+        <Music />
+        <About />
+        {isSectionVisible('#tour') && <Tour />}
+        <Gallery />
+        <Merch />
+        {isSectionVisible('#press') && <Press />}
+        <Contact />
+      </main>
+      <Footer />
+    </motion.div>
   );
 }

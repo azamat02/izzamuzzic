@@ -3,26 +3,24 @@ import { api } from '../../lib/api';
 import { Link } from 'react-router-dom';
 import {
   HiOutlineMusicNote, HiOutlinePhotograph, HiOutlineShoppingBag,
-  HiOutlineCalendar, HiOutlineNewspaper, HiOutlineMail, HiOutlineGlobe,
+  HiOutlineMail, HiOutlineGlobe, HiOutlineClipboardList,
 } from 'react-icons/hi';
 
 export function AdminDashboard() {
   const { data: releases } = useQuery({ queryKey: ['releases'], queryFn: () => api.get<any[]>('/releases') });
   const { data: gallery } = useQuery({ queryKey: ['gallery'], queryFn: () => api.get<any[]>('/gallery') });
   const { data: merch } = useQuery({ queryKey: ['merch'], queryFn: () => api.get<any[]>('/merch') });
-  const { data: tours } = useQuery({ queryKey: ['tours'], queryFn: () => api.get<any[]>('/tours') });
-  const { data: press } = useQuery({ queryKey: ['press'], queryFn: () => api.get<any[]>('/press') });
   const { data: contacts } = useQuery({ queryKey: ['contact-categories'], queryFn: () => api.get<any[]>('/contact-categories') });
   const { data: socials } = useQuery({ queryKey: ['socials'], queryFn: () => api.get<any[]>('/socials') });
+  const { data: orders } = useQuery({ queryKey: ['orders'], queryFn: () => api.get<any[]>('/orders') });
 
   const stats = [
     { label: 'Releases', count: releases?.length ?? 0, icon: HiOutlineMusicNote, path: '/admin/releases', color: 'bg-purple-500/10 text-purple-400' },
     { label: 'Gallery Photos', count: gallery?.length ?? 0, icon: HiOutlinePhotograph, path: '/admin/gallery', color: 'bg-blue-500/10 text-blue-400' },
     { label: 'Merch Items', count: merch?.length ?? 0, icon: HiOutlineShoppingBag, path: '/admin/merch', color: 'bg-green-500/10 text-green-400' },
-    { label: 'Tour Dates', count: tours?.length ?? 0, icon: HiOutlineCalendar, path: '/admin/tours', color: 'bg-yellow-500/10 text-yellow-400' },
-    { label: 'Press Quotes', count: press?.length ?? 0, icon: HiOutlineNewspaper, path: '/admin/press', color: 'bg-pink-500/10 text-pink-400' },
     { label: 'Contact Categories', count: contacts?.length ?? 0, icon: HiOutlineMail, path: '/admin/contact', color: 'bg-orange-500/10 text-orange-400' },
     { label: 'Social Links', count: socials?.length ?? 0, icon: HiOutlineGlobe, path: '/admin/socials', color: 'bg-cyan-500/10 text-cyan-400' },
+    { label: 'Orders', count: orders?.length ?? 0, icon: HiOutlineClipboardList, path: '/admin/orders', color: 'bg-yellow-500/10 text-yellow-400' },
   ];
 
   return (

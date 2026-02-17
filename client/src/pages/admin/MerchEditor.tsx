@@ -4,32 +4,52 @@ import { api } from '../../lib/api';
 import { ImageUploader } from '../../components/admin/ImageUploader';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck, HiOutlineX } from 'react-icons/hi';
 
+interface MerchImage {
+  id: number;
+  merchItemId: number;
+  url: string;
+  sortOrder: number;
+}
+
+interface MerchVariant {
+  id: number;
+  merchItemId: number;
+  label: string;
+  inStock: boolean;
+  sortOrder: number;
+}
+
 interface MerchItem {
   id: number;
   name: string;
+  description: string;
   price: number;
   currency: string;
   image: string;
-  url: string;
   sortOrder: number;
+  images: MerchImage[];
+  variants: MerchVariant[];
 }
 
 interface MerchForm {
   name: string;
+  description: string;
   price: number;
   currency: string;
   image: string;
-  url: string;
   sortOrder: number;
 }
 
-const emptyForm: MerchForm = { name: '', price: 0, currency: 'USD', image: '', url: '', sortOrder: 0 };
+const emptyForm: MerchForm = { name: '', description: '', price: 0, currency: 'USD', image: '', sortOrder: 0 };
 
 export function MerchEditor() {
   const queryClient = useQueryClient();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [editForm, setEditForm] = useState<MerchForm>(emptyForm);
+  const [managingImagesId, setManagingImagesId] = useState<number | null>(null);
+  const [managingVariantsId, setManagingVariantsId] = useState<number | null>(null);
+  const [newVariantLabel, setNewVariantLabel] = useState('');
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['merch'],
@@ -60,14 +80,53 @@ export function MerchEditor() {
     },
   });
 
+  const addImageMutation = useMutation({
+    mutationFn: ({ merchItemId, url, sortOrder }: { merchItemId: number; url: string; sortOrder: number }) =>
+      api.post(`/merch/${merchItemId}/images`, { url, sortOrder }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['merch'] });
+    },
+  });
+
+  const deleteImageMutation = useMutation({
+    mutationFn: (imageId: number) => api.delete(`/merch-images/${imageId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['merch'] });
+    },
+  });
+
+  const addVariantMutation = useMutation({
+    mutationFn: ({ merchItemId, label, sortOrder }: { merchItemId: number; label: string; sortOrder: number }) =>
+      api.post(`/merch/${merchItemId}/variants`, { label, inStock: true, sortOrder }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['merch'] });
+      setNewVariantLabel('');
+    },
+  });
+
+  const updateVariantMutation = useMutation({
+    mutationFn: ({ id, inStock }: { id: number; inStock: boolean }) =>
+      api.put(`/merch-variants/${id}`, { inStock }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['merch'] });
+    },
+  });
+
+  const deleteVariantMutation = useMutation({
+    mutationFn: (id: number) => api.delete(`/merch-variants/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['merch'] });
+    },
+  });
+
   const handleEdit = (item: MerchItem) => {
     setEditingId(item.id);
     setEditForm({
       name: item.name,
+      description: item.description || '',
       price: item.price,
       currency: item.currency,
       image: item.image,
-      url: item.url,
       sortOrder: item.sortOrder,
     });
   };
@@ -88,11 +147,24 @@ export function MerchEditor() {
     createMutation.mutate(editForm);
   };
 
+  const handleAddImage = (merchItemId: number, url: string) => {
+    const item = items.find(i => i.id === merchItemId);
+    const sortOrder = item?.images?.length || 0;
+    addImageMutation.mutate({ merchItemId, url, sortOrder });
+  };
+
+  const handleAddVariant = (merchItemId: number) => {
+    if (!newVariantLabel.trim()) return;
+    const item = items.find(i => i.id === merchItemId);
+    const sortOrder = item?.variants?.length || 0;
+    addVariantMutation.mutate({ merchItemId, label: newVariantLabel.trim(), sortOrder });
+  };
+
   const renderForm = (onSubmit: () => void, isPending: boolean, submitLabel: string, onCancel: () => void) => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[#a0a0a0] text-sm mb-2">Image</label>
+          <label className="block text-[#a0a0a0] text-sm mb-2">Cover Image</label>
           <ImageUploader
             value={editForm.image}
             onChange={(url) => setEditForm({ ...editForm, image: url })}
@@ -107,6 +179,16 @@ export function MerchEditor() {
               onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
               className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#e63946] transition-colors"
               placeholder="Product name"
+            />
+          </div>
+          <div>
+            <label className="block text-[#a0a0a0] text-sm mb-2">Description</label>
+            <textarea
+              value={editForm.description}
+              onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+              className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#e63946] transition-colors resize-none"
+              placeholder="Product description"
+              rows={3}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -130,16 +212,6 @@ export function MerchEditor() {
                 placeholder="USD"
               />
             </div>
-          </div>
-          <div>
-            <label className="block text-[#a0a0a0] text-sm mb-2">URL</label>
-            <input
-              type="url"
-              value={editForm.url}
-              onChange={(e) => setEditForm({ ...editForm, url: e.target.value })}
-              className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#e63946] transition-colors"
-              placeholder="https://store.example.com/product"
-            />
           </div>
           <div>
             <label className="block text-[#a0a0a0] text-sm mb-2">Sort Order</label>
@@ -167,6 +239,103 @@ export function MerchEditor() {
         >
           <HiOutlineX className="text-lg" />
           Cancel
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderImagesPanel = (item: MerchItem) => (
+    <div className="border-t border-[#1a1a1a] mt-4 pt-4">
+      <div className="flex items-center justify-between mb-3">
+        <label className="text-[#a0a0a0] text-sm">Additional Photos ({item.images?.length || 0})</label>
+        <button
+          onClick={() => setManagingImagesId(null)}
+          className="text-[#a0a0a0] hover:text-white text-sm transition-colors"
+        >
+          Close
+        </button>
+      </div>
+
+      {/* Existing images */}
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        {(item.images || []).map((img) => (
+          <div key={img.id} className="relative group">
+            <img src={img.url} alt="" className="w-full h-24 object-cover rounded-lg border border-[#1a1a1a]" />
+            <button
+              onClick={() => deleteImageMutation.mutate(img.id)}
+              disabled={deleteImageMutation.isPending}
+              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <HiOutlineX className="text-xs" />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Upload new */}
+      <ImageUploader
+        value=""
+        onChange={(url) => {
+          if (url) handleAddImage(item.id, url);
+        }}
+      />
+    </div>
+  );
+
+  const renderVariantsPanel = (item: MerchItem) => (
+    <div className="border-t border-[#1a1a1a] mt-4 pt-4">
+      <div className="flex items-center justify-between mb-3">
+        <label className="text-[#a0a0a0] text-sm">Variants / Sizes ({item.variants?.length || 0})</label>
+        <button
+          onClick={() => setManagingVariantsId(null)}
+          className="text-[#a0a0a0] hover:text-white text-sm transition-colors"
+        >
+          Close
+        </button>
+      </div>
+
+      {/* Existing variants */}
+      <div className="space-y-2 mb-3">
+        {(item.variants || []).map((variant) => (
+          <div key={variant.id} className="flex items-center gap-2">
+            <button
+              onClick={() => updateVariantMutation.mutate({ id: variant.id, inStock: !variant.inStock })}
+              disabled={updateVariantMutation.isPending}
+              className={`flex-1 text-left px-3 py-1.5 rounded-lg text-sm border transition-colors ${
+                variant.inStock
+                  ? 'border-green-500/50 bg-green-500/10 text-green-400'
+                  : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#555] line-through'
+              }`}
+            >
+              {variant.label} {variant.inStock ? '- In Stock' : '- Out of Stock'}
+            </button>
+            <button
+              onClick={() => deleteVariantMutation.mutate(variant.id)}
+              disabled={deleteVariantMutation.isPending}
+              className="text-[#a0a0a0] hover:text-[#e63946] p-1 rounded transition-colors"
+            >
+              <HiOutlineX className="text-sm" />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Add new variant */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={newVariantLabel}
+          onChange={(e) => setNewVariantLabel(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleAddVariant(item.id); }}
+          className="flex-1 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-[#e63946] transition-colors"
+          placeholder="e.g. S, M, L, XL"
+        />
+        <button
+          onClick={() => handleAddVariant(item.id)}
+          disabled={addVariantMutation.isPending || !newVariantLabel.trim()}
+          className="bg-[#e63946] text-white px-3 py-1.5 rounded-lg hover:bg-[#ff6b6b] transition-colors text-sm disabled:opacity-50"
+        >
+          Add
         </button>
       </div>
     </div>
@@ -222,32 +391,57 @@ export function MerchEditor() {
                   <p className="text-[#e63946] font-bold mt-1">
                     {item.price} {item.currency}
                   </p>
-                  {item.url && (
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#a0a0a0] text-xs hover:text-white transition-colors truncate block mt-1"
-                    >
-                      {item.url}
-                    </a>
+                  {item.description && (
+                    <p className="text-[#a0a0a0] text-xs mt-1 line-clamp-2">{item.description}</p>
+                  )}
+                  {item.images?.length > 0 && (
+                    <p className="text-[#a0a0a0] text-xs mt-1">
+                      +{item.images.length} photo{item.images.length !== 1 ? 's' : ''}
+                    </p>
+                  )}
+                  {item.variants?.length > 0 && (
+                    <p className="text-[#a0a0a0] text-xs mt-1">
+                      {item.variants.filter(v => v.inStock).length}/{item.variants.length} variants in stock
+                    </p>
                   )}
                   <p className="text-[#a0a0a0] text-xs mt-1">Sort: {item.sortOrder}</p>
                   <div className="flex gap-2 mt-3">
                     <button
                       onClick={() => handleEdit(item)}
                       className="text-[#a0a0a0] hover:text-white p-2 rounded-lg hover:bg-[#1a1a1a] transition-colors"
+                      title="Edit"
                     >
                       <HiOutlinePencil className="text-lg" />
+                    </button>
+                    <button
+                      onClick={() => setManagingImagesId(managingImagesId === item.id ? null : item.id)}
+                      className="text-[#a0a0a0] hover:text-white p-2 rounded-lg hover:bg-[#1a1a1a] transition-colors"
+                      title="Manage photos"
+                    >
+                      <HiOutlinePlus className="text-lg" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setManagingVariantsId(managingVariantsId === item.id ? null : item.id);
+                        setNewVariantLabel('');
+                      }}
+                      className="text-[#a0a0a0] hover:text-white p-2 rounded-lg hover:bg-[#1a1a1a] transition-colors text-xs font-bold"
+                      title="Manage variants"
+                    >
+                      S/M/L
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
                       disabled={deleteMutation.isPending}
                       className="text-[#a0a0a0] hover:text-[#e63946] p-2 rounded-lg hover:bg-[#1a1a1a] transition-colors disabled:opacity-50"
+                      title="Delete"
                     >
                       <HiOutlineTrash className="text-lg" />
                     </button>
                   </div>
+
+                  {managingImagesId === item.id && renderImagesPanel(item)}
+                  {managingVariantsId === item.id && renderVariantsPanel(item)}
                 </div>
               </>
             )}

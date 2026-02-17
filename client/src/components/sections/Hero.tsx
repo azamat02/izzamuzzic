@@ -1,36 +1,34 @@
 import { motion } from 'framer-motion';
-import { useScrollFrames } from '../../hooks/useScrollFrames';
-
-const TOTAL_FRAMES = 121;
 
 export function Hero() {
-  const { containerRef, canvasRef } = useScrollFrames(TOTAL_FRAMES, '/frames');
-
   return (
-    <section
-      ref={containerRef}
-      className="relative h-screen w-full overflow-hidden"
-    >
-      {/* Canvas for frame rendering */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+    <section className="relative h-screen w-full overflow-hidden bg-[#282828]">
+      {/* Background video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      >
+        <source src="/hero-video.mp4" type="video/mp4" />
+      </video>
+      {/* Bottom gradient — smooth transition to the next section */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator — bottom right */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        transition={{ delay: 1.5, duration: 1 }}
+        className="absolute bottom-8 right-12 max-lg:right-6"
       >
         <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5 }}
-          className="w-6 h-10 border-2 border-[#a0a0a0] rounded-full flex justify-center"
+          animate={{ y: [0, 8, 0] }}
+          transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+          className="w-[45px] h-[45px] border border-white/60 rounded-full flex items-center justify-center"
         >
-          <motion.div className="w-1 h-3 bg-[#a0a0a0] rounded-full mt-2" />
+          <div className="w-2 h-2 bg-white rounded-full" />
         </motion.div>
       </motion.div>
     </section>

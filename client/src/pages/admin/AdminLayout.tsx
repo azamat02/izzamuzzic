@@ -3,7 +3,7 @@ import { useAuth } from '../../lib/auth';
 import { useState } from 'react';
 import {
   HiOutlineHome, HiOutlineUser, HiOutlineMusicNote, HiOutlinePhotograph,
-  HiOutlineShoppingBag, HiOutlineCalendar, HiOutlineNewspaper,
+  HiOutlineShoppingBag, HiOutlineClipboardList,
   HiOutlineMail, HiOutlineGlobe, HiOutlineMenu as HiOutlineNavigation,
   HiOutlineCog, HiOutlineLogout, HiOutlineX, HiMenu,
 } from 'react-icons/hi';
@@ -14,8 +14,7 @@ const navItems = [
   { label: 'Releases', path: '/admin/releases', icon: HiOutlineMusicNote },
   { label: 'Gallery', path: '/admin/gallery', icon: HiOutlinePhotograph },
   { label: 'Merch', path: '/admin/merch', icon: HiOutlineShoppingBag },
-  { label: 'Tours', path: '/admin/tours', icon: HiOutlineCalendar },
-  { label: 'Press', path: '/admin/press', icon: HiOutlineNewspaper },
+  { label: 'Orders', path: '/admin/orders', icon: HiOutlineClipboardList },
   { label: 'Contact', path: '/admin/contact', icon: HiOutlineMail },
   { label: 'Socials', path: '/admin/socials', icon: HiOutlineGlobe },
   { label: 'Navigation', path: '/admin/navigation', icon: HiOutlineNavigation },

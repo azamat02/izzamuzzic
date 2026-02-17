@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HiMenu, HiX } from 'react-icons/hi';
+import { Link, useLocation } from 'react-router-dom';
+import { HiMenu, HiX, HiOutlineShoppingCart } from 'react-icons/hi';
 import { SocialLinks } from '../ui/SocialLinks';
 import { usePublicData } from '../../hooks/useApi';
+import { useCart } from '../../lib/cart';
 
 interface NavigationItem {
   id: number;
@@ -17,7 +19,15 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data: navItems } = usePublicData<NavigationItem[]>('navigation', '/navigation');
 
+  const { itemCount } = useCart();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
   const visibleItems = (navItems || []).filter(item => item.visible);
+
+  const getNavHref = (href: string) => {
+    if (isHomePage) return href;
+    return `/${href}`;
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,35 +46,53 @@ export function Header() {
         isScrolled ? 'bg-[#0a0a0a]/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <div className="w-full px-6 sm:px-10 lg:px-16">
         <div className="flex items-center justify-between h-20 w-full">
-          <a href="#" className="hover:opacity-80 transition-opacity">
+          <Link to="/" className="hover:opacity-80 transition-opacity">
             <img src="/logo_white.png" alt="IZZAMUZZIC" className="h-16" />
-          </a>
+          </Link>
 
           <nav className="hidden lg:flex items-center gap-8">
             {visibleItems.map((item) => (
               <a
                 key={item.id}
-                href={item.href}
-                className="text-sm font-medium text-[#a0a0a0] hover:text-white transition-colors duration-300 uppercase tracking-wider"
+                href={getNavHref(item.href)}
+                className="text-sm font-medium text-white hover:text-[#ff3c00] transition-colors duration-300 uppercase tracking-wider"
               >
                 {item.label}
               </a>
             ))}
           </nav>
 
-          <div className="hidden lg:block">
+          <div className="hidden lg:flex items-center gap-4">
             <SocialLinks size="sm" />
+            <Link to="/cart" className="relative text-white hover:text-[#ff3c00] transition-colors">
+              <HiOutlineShoppingCart className="text-xl" />
+              {itemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-[#e63946] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
           </div>
 
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden text-white text-2xl p-2"
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? <HiX /> : <HiMenu />}
-          </button>
+          <div className="lg:hidden flex items-center gap-2">
+            <Link to="/cart" className="relative text-white hover:text-[#ff3c00] transition-colors p-2">
+              <HiOutlineShoppingCart className="text-xl" />
+              {itemCount > 0 && (
+                <span className="absolute top-0 right-0 bg-[#e63946] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-white text-2xl p-2"
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? <HiX /> : <HiMenu />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -80,12 +108,12 @@ export function Header() {
               {visibleItems.map((item, index) => (
                 <motion.a
                   key={item.id}
-                  href={item.href}
+                  href={getNavHref(item.href)}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-lg font-medium text-[#a0a0a0] hover:text-white transition-colors uppercase tracking-wider"
+                  className="text-lg font-medium text-white hover:text-[#ff3c00] transition-colors uppercase tracking-wider"
                 >
                   {item.label}
                 </motion.a>

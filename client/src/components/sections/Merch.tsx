@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { SectionTitle } from '../ui/SectionTitle';
 import { Button } from '../ui/Button';
 import { usePublicData } from '../../hooks/useApi';
@@ -9,7 +10,6 @@ interface MerchItem {
   price: number;
   currency: string;
   image: string;
-  url: string | null;
   sortOrder: number;
 }
 
@@ -35,22 +35,29 @@ export function Merch() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="group"
             >
-              <div className="relative aspect-square overflow-hidden rounded-lg mb-4 bg-[#141414]">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
-              <h3 className="text-white font-medium mb-1">{item.name}</h3>
-              <p className="text-[#e63946] font-medium mb-3">
-                ${item.price} {item.currency}
-              </p>
-              <Button href={item.url || '#'} variant="secondary" size="sm" className="w-full">
-                Shop Now
-              </Button>
+              <Link to={`/merch/${item.id}`}>
+                <div className="relative aspect-square overflow-hidden rounded-lg mb-4 bg-[#141414]">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <h3 className="text-white font-medium mb-1">{item.name}</h3>
+                <p className="text-[#e63946] font-medium mb-3">
+                  ${item.price} {item.currency}
+                </p>
+              </Link>
             </motion.div>
           ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <Link to="/merch">
+            <Button variant="outline" size="lg">
+              View All
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

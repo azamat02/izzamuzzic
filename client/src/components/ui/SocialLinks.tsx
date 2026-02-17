@@ -36,7 +36,7 @@ export function SocialLinks({ size = 'md', className = '' }: SocialLinksProps) {
             href={social.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${sizes[size]} text-[#a0a0a0] hover:text-[#e63946] transition-colors duration-300`}
+            className={`${sizes[size]} text-white hover:text-[#ff3c00] transition-colors duration-300`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
