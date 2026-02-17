@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 import * as schema from './schema.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.join(__dirname, '..', '..', 'data.db');
+const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '..', '..', 'data.db');
 
 const sqlite = new Database(dbPath);
 sqlite.pragma('journal_mode = WAL');
@@ -47,6 +47,14 @@ sqlite.exec(`
     sort_order INTEGER NOT NULL DEFAULT 0
   );
 
+  CREATE TABLE IF NOT EXISTS release_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    release_id INTEGER NOT NULL,
+    platform TEXT NOT NULL,
+    url TEXT NOT NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0
+  );
+
   CREATE TABLE IF NOT EXISTS music_settings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subtitle TEXT NOT NULL DEFAULT 'Latest releases and tracks',
@@ -63,10 +71,26 @@ sqlite.exec(`
   CREATE TABLE IF NOT EXISTS merch_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
     price REAL NOT NULL,
     currency TEXT NOT NULL DEFAULT 'USD',
     image TEXT NOT NULL DEFAULT '',
     url TEXT,
+    sort_order INTEGER NOT NULL DEFAULT 0
+  );
+
+  CREATE TABLE IF NOT EXISTS merch_item_variants (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    merch_item_id INTEGER NOT NULL,
+    label TEXT NOT NULL,
+    in_stock INTEGER NOT NULL DEFAULT 1,
+    sort_order INTEGER NOT NULL DEFAULT 0
+  );
+
+  CREATE TABLE IF NOT EXISTS merch_item_images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    merch_item_id INTEGER NOT NULL,
+    url TEXT NOT NULL,
     sort_order INTEGER NOT NULL DEFAULT 0
   );
 
@@ -120,15 +144,44 @@ sqlite.exec(`
     key TEXT NOT NULL UNIQUE,
     value TEXT NOT NULL DEFAULT ''
   );
+
+  CREATE TABLE IF NOT EXISTS orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_name TEXT NOT NULL,
+    customer_phone TEXT NOT NULL,
+    customer_email TEXT NOT NULL,
+    customer_address TEXT NOT NULL,
+    total_amount REAL NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'KZT',
+    status TEXT NOT NULL DEFAULT 'pending',
+    receipt_url TEXT NOT NULL DEFAULT '',
+    note TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS order_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL,
+    merch_item_id INTEGER NOT NULL,
+    variant_id INTEGER,
+    name TEXT NOT NULL,
+    variant_label TEXT NOT NULL DEFAULT '',
+    price REAL NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1
+  );
 `);
 
 // Clear existing data
 sqlite.exec(`
+  DELETE FROM order_items;
+  DELETE FROM orders;
   DELETE FROM admin_users;
   DELETE FROM about_content;
+  DELETE FROM release_links;
   DELETE FROM releases;
   DELETE FROM music_settings;
   DELETE FROM gallery_images;
+  DELETE FROM merch_item_variants;
   DELETE FROM merch_items;
   DELETE FROM tour_dates;
   DELETE FROM press_items;
@@ -171,6 +224,17 @@ for (const r of releasesData) {
   db.insert(schema.releases).values(r).run();
 }
 
+// Seed release links (migrate from spotifyUrl/youtubeUrl)
+const allReleases = db.select().from(schema.releases).all();
+for (const r of allReleases) {
+  if (r.spotifyUrl) {
+    db.insert(schema.releaseLinks).values({ releaseId: r.id, platform: 'FaSpotify', url: r.spotifyUrl, sortOrder: 0 }).run();
+  }
+  if (r.youtubeUrl) {
+    db.insert(schema.releaseLinks).values({ releaseId: r.id, platform: 'FaYoutube', url: r.youtubeUrl, sortOrder: 1 }).run();
+  }
+}
+
 // Seed music settings
 db.insert(schema.musicSettings).values({
   subtitle: 'Latest releases and tracks',
@@ -192,13 +256,52 @@ for (const g of galleryData) {
 
 // Seed merch
 const merchData = [
-  { name: 'Classic T-Shirt Black', price: 35, currency: 'USD', image: 'https://placehold.co/300x300/141414/ffffff?text=T-Shirt', url: '#', sortOrder: 0 },
-  { name: 'Hoodie Limited Edition', price: 75, currency: 'USD', image: 'https://placehold.co/300x300/141414/ffffff?text=Hoodie', url: '#', sortOrder: 1 },
-  { name: 'Vinyl LP', price: 45, currency: 'USD', image: 'https://placehold.co/300x300/141414/e63946?text=Vinyl', url: '#', sortOrder: 2 },
-  { name: 'Poster Collection', price: 25, currency: 'USD', image: 'https://placehold.co/300x300/141414/ffffff?text=Poster', url: '#', sortOrder: 3 },
+  { name: 'Classic T-Shirt Black', description: 'Premium cotton t-shirt with the iconic IZZAMUZZIC logo. Comfortable fit, perfect for concerts and everyday wear.', price: 35, currency: 'USD', image: 'https://placehold.co/300x300/141414/ffffff?text=T-Shirt', url: '#', sortOrder: 0 },
+  { name: 'Hoodie Limited Edition', description: 'Limited edition heavyweight hoodie. Embroidered logo on chest, album artwork on back. Only 200 pieces made.', price: 75, currency: 'USD', image: 'https://placehold.co/300x300/141414/ffffff?text=Hoodie', url: '#', sortOrder: 1 },
+  { name: 'Vinyl LP', description: 'Full-length album on 180g vinyl. Includes exclusive artwork insert and download code.', price: 45, currency: 'USD', image: 'https://placehold.co/300x300/141414/e63946?text=Vinyl', url: '#', sortOrder: 2 },
+  { name: 'Poster Collection', description: 'Set of 3 high-quality art prints featuring album cover designs. A3 format on matte paper.', price: 25, currency: 'USD', image: 'https://placehold.co/300x300/141414/ffffff?text=Poster', url: '#', sortOrder: 3 },
 ];
 for (const m of merchData) {
   db.insert(schema.merchItems).values(m).run();
+}
+
+// Seed merch variants
+const allMerchItems = db.select().from(schema.merchItems).all();
+const tshirt = allMerchItems.find(i => i.name.includes('T-Shirt'));
+const hoodie = allMerchItems.find(i => i.name.includes('Hoodie'));
+const vinyl = allMerchItems.find(i => i.name.includes('Vinyl'));
+const poster = allMerchItems.find(i => i.name.includes('Poster'));
+
+if (tshirt) {
+  const sizes = [
+    { label: 'S', inStock: true, sortOrder: 0 },
+    { label: 'M', inStock: true, sortOrder: 1 },
+    { label: 'L', inStock: true, sortOrder: 2 },
+    { label: 'XL', inStock: false, sortOrder: 3 },
+  ];
+  for (const s of sizes) {
+    db.insert(schema.merchItemVariants).values({ ...s, merchItemId: tshirt.id }).run();
+  }
+}
+
+if (hoodie) {
+  const sizes = [
+    { label: 'S', inStock: false, sortOrder: 0 },
+    { label: 'M', inStock: true, sortOrder: 1 },
+    { label: 'L', inStock: true, sortOrder: 2 },
+    { label: 'XL', inStock: true, sortOrder: 3 },
+  ];
+  for (const s of sizes) {
+    db.insert(schema.merchItemVariants).values({ ...s, merchItemId: hoodie.id }).run();
+  }
+}
+
+if (vinyl) {
+  db.insert(schema.merchItemVariants).values({ label: 'One Size', inStock: true, sortOrder: 0, merchItemId: vinyl.id }).run();
+}
+
+if (poster) {
+  db.insert(schema.merchItemVariants).values({ label: 'One Size', inStock: true, sortOrder: 0, merchItemId: poster.id }).run();
 }
 
 // Seed tour dates
@@ -271,6 +374,7 @@ const settingsData = [
   { key: 'merchSubtitle', value: 'Official merchandise' },
   { key: 'tourSubtitle', value: 'Upcoming shows and events' },
   { key: 'pressSubtitle', value: 'What they\'re saying' },
+  { key: 'kaspiPayUrl', value: '' },
 ];
 for (const s of settingsData) {
   db.insert(schema.siteSettings).values(s).run();

@@ -1,0 +1,17 @@
+node_modules
+*/node_modules
+client/dist
+server/dist
+server/data.db
+server/data.db-shm
+server/data.db-wal
+.git
+.gitignore
+.claude
+.playwright-mcp
+.vscode
+.idea
+.DS_Store
+*.md
+*.mp4
+.vercel

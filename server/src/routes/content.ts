@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db, schema } from '../db/index.js';
-import { eq, asc } from 'drizzle-orm';
+import { eq, asc, desc } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
@@ -24,8 +24,27 @@ router.put('/about', authMiddleware, (req, res) => {
 
 // ============ RELEASES ============
 router.get('/releases', (_req, res) => {
-  const data = db.select().from(schema.releases).orderBy(asc(schema.releases.sortOrder)).all();
+  const items = db.select().from(schema.releases).orderBy(asc(schema.releases.sortOrder)).all();
+  const allLinks = db.select().from(schema.releaseLinks).orderBy(asc(schema.releaseLinks.sortOrder)).all();
+  const data = items.map(item => ({
+    ...item,
+    links: allLinks.filter(l => l.releaseId === item.id),
+  }));
   res.json(data);
+});
+
+router.get('/releases/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const item = db.select().from(schema.releases).where(eq(schema.releases.id, id)).get();
+  if (!item) {
+    res.status(404).json({ error: 'Release not found' });
+    return;
+  }
+  const links = db.select().from(schema.releaseLinks)
+    .where(eq(schema.releaseLinks.releaseId, id))
+    .orderBy(asc(schema.releaseLinks.sortOrder))
+    .all();
+  res.json({ ...item, links });
 });
 
 router.post('/releases', authMiddleware, (req, res) => {
@@ -42,7 +61,31 @@ router.put('/releases/:id', authMiddleware, (req, res) => {
 
 router.delete('/releases/:id', authMiddleware, (req, res) => {
   const id = parseInt(req.params.id);
+  db.delete(schema.releaseLinks).where(eq(schema.releaseLinks.releaseId, id)).run();
   db.delete(schema.releases).where(eq(schema.releases.id, id)).run();
+  res.json({ success: true });
+});
+
+// ============ RELEASE LINKS ============
+router.post('/releases/:id/links', authMiddleware, (req, res) => {
+  const releaseId = parseInt(req.params.id);
+  const result = db.insert(schema.releaseLinks)
+    .values({ ...req.body, releaseId })
+    .returning()
+    .get();
+  res.status(201).json(result);
+});
+
+router.put('/release-links/:id', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id);
+  db.update(schema.releaseLinks).set(req.body).where(eq(schema.releaseLinks.id, id)).run();
+  const data = db.select().from(schema.releaseLinks).where(eq(schema.releaseLinks.id, id)).get();
+  res.json(data);
+});
+
+router.delete('/release-links/:id', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id);
+  db.delete(schema.releaseLinks).where(eq(schema.releaseLinks.id, id)).run();
   res.json({ success: true });
 });
 
@@ -89,8 +132,33 @@ router.delete('/gallery/:id', authMiddleware, (req, res) => {
 
 // ============ MERCH ============
 router.get('/merch', (_req, res) => {
-  const data = db.select().from(schema.merchItems).orderBy(asc(schema.merchItems.sortOrder)).all();
+  const items = db.select().from(schema.merchItems).orderBy(asc(schema.merchItems.sortOrder)).all();
+  const allImages = db.select().from(schema.merchItemImages).orderBy(asc(schema.merchItemImages.sortOrder)).all();
+  const allVariants = db.select().from(schema.merchItemVariants).orderBy(asc(schema.merchItemVariants.sortOrder)).all();
+  const data = items.map(item => ({
+    ...item,
+    images: allImages.filter(img => img.merchItemId === item.id),
+    variants: allVariants.filter(v => v.merchItemId === item.id),
+  }));
   res.json(data);
+});
+
+router.get('/merch/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const item = db.select().from(schema.merchItems).where(eq(schema.merchItems.id, id)).get();
+  if (!item) {
+    res.status(404).json({ error: 'Merch item not found' });
+    return;
+  }
+  const images = db.select().from(schema.merchItemImages)
+    .where(eq(schema.merchItemImages.merchItemId, id))
+    .orderBy(asc(schema.merchItemImages.sortOrder))
+    .all();
+  const variants = db.select().from(schema.merchItemVariants)
+    .where(eq(schema.merchItemVariants.merchItemId, id))
+    .orderBy(asc(schema.merchItemVariants.sortOrder))
+    .all();
+  res.json({ ...item, images, variants });
 });
 
 router.post('/merch', authMiddleware, (req, res) => {
@@ -107,7 +175,57 @@ router.put('/merch/:id', authMiddleware, (req, res) => {
 
 router.delete('/merch/:id', authMiddleware, (req, res) => {
   const id = parseInt(req.params.id);
+  db.delete(schema.merchItemVariants).where(eq(schema.merchItemVariants.merchItemId, id)).run();
+  db.delete(schema.merchItemImages).where(eq(schema.merchItemImages.merchItemId, id)).run();
   db.delete(schema.merchItems).where(eq(schema.merchItems.id, id)).run();
+  res.json({ success: true });
+});
+
+// ============ MERCH IMAGES ============
+router.get('/merch/:id/images', (req, res) => {
+  const merchItemId = parseInt(req.params.id);
+  const data = db.select().from(schema.merchItemImages)
+    .where(eq(schema.merchItemImages.merchItemId, merchItemId))
+    .orderBy(asc(schema.merchItemImages.sortOrder))
+    .all();
+  res.json(data);
+});
+
+router.post('/merch/:id/images', authMiddleware, (req, res) => {
+  const merchItemId = parseInt(req.params.id);
+  const result = db.insert(schema.merchItemImages)
+    .values({ ...req.body, merchItemId })
+    .returning()
+    .get();
+  res.status(201).json(result);
+});
+
+router.delete('/merch-images/:id', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id);
+  db.delete(schema.merchItemImages).where(eq(schema.merchItemImages.id, id)).run();
+  res.json({ success: true });
+});
+
+// ============ MERCH VARIANTS ============
+router.post('/merch/:id/variants', authMiddleware, (req, res) => {
+  const merchItemId = parseInt(req.params.id);
+  const result = db.insert(schema.merchItemVariants)
+    .values({ ...req.body, merchItemId })
+    .returning()
+    .get();
+  res.status(201).json(result);
+});
+
+router.put('/merch-variants/:id', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id);
+  db.update(schema.merchItemVariants).set(req.body).where(eq(schema.merchItemVariants.id, id)).run();
+  const data = db.select().from(schema.merchItemVariants).where(eq(schema.merchItemVariants.id, id)).get();
+  res.json(data);
+});
+
+router.delete('/merch-variants/:id', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id);
+  db.delete(schema.merchItemVariants).where(eq(schema.merchItemVariants.id, id)).run();
   res.json({ success: true });
 });
 
@@ -274,6 +392,93 @@ router.put('/settings', authMiddleware, (req, res) => {
     result[s.key] = s.value;
   }
   res.json(result);
+});
+
+// ============ ORDERS ============
+
+// Public: create order
+router.post('/orders', (req, res) => {
+  const { customerName, customerPhone, customerEmail, customerAddress, items, receiptUrl, receiptValid } = req.body;
+  if (!customerName || !customerPhone || !customerEmail || !customerAddress || !items?.length) {
+    res.status(400).json({ error: 'Missing required fields' });
+    return;
+  }
+
+  const totalAmount = items.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
+  const status = receiptValid === true ? 'paid' : 'pending';
+
+  const order = db.insert(schema.orders).values({
+    customerName,
+    customerPhone,
+    customerEmail,
+    customerAddress,
+    totalAmount,
+    currency: 'KZT',
+    status,
+    receiptUrl: receiptUrl || '',
+    note: '',
+    createdAt: new Date().toISOString(),
+  }).returning().get();
+
+  for (const item of items) {
+    db.insert(schema.orderItems).values({
+      orderId: order.id,
+      merchItemId: item.merchItemId,
+      variantId: item.variantId || null,
+      name: item.name,
+      variantLabel: item.variantLabel || '',
+      price: item.price,
+      quantity: item.quantity,
+    }).run();
+  }
+
+  res.status(201).json({ id: order.id, status: order.status });
+});
+
+// Public: check order status
+router.get('/orders/:id/status', (req, res) => {
+  const id = parseInt(req.params.id);
+  const order = db.select({ status: schema.orders.status }).from(schema.orders).where(eq(schema.orders.id, id)).get();
+  if (!order) {
+    res.status(404).json({ error: 'Order not found' });
+    return;
+  }
+  res.json({ status: order.status });
+});
+
+// Admin: list all orders
+router.get('/orders', authMiddleware, (_req, res) => {
+  const allOrders = db.select().from(schema.orders).orderBy(desc(schema.orders.id)).all();
+  const allItems = db.select().from(schema.orderItems).all();
+  const data = allOrders.map(order => ({
+    ...order,
+    items: allItems.filter(item => item.orderId === order.id),
+  }));
+  res.json(data);
+});
+
+// Admin: get single order
+router.get('/orders/:id', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id);
+  const order = db.select().from(schema.orders).where(eq(schema.orders.id, id)).get();
+  if (!order) {
+    res.status(404).json({ error: 'Order not found' });
+    return;
+  }
+  const items = db.select().from(schema.orderItems).where(eq(schema.orderItems.orderId, id)).all();
+  res.json({ ...order, items });
+});
+
+// Admin: update order (status, note)
+router.put('/orders/:id', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id);
+  const { status, note } = req.body;
+  const updates: Record<string, any> = {};
+  if (status !== undefined) updates.status = status;
+  if (note !== undefined) updates.note = note;
+  db.update(schema.orders).set(updates).where(eq(schema.orders.id, id)).run();
+  const order = db.select().from(schema.orders).where(eq(schema.orders.id, id)).get();
+  res.json(order);
 });
 
 export default router;

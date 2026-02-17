@@ -32,6 +32,14 @@ export const releases = sqliteTable('releases', {
   sortOrder: integer('sort_order').notNull().default(0),
 });
 
+export const releaseLinks = sqliteTable('release_links', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  releaseId: integer('release_id').notNull(),
+  platform: text('platform').notNull(),
+  url: text('url').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
 export const musicSettings = sqliteTable('music_settings', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   subtitle: text('subtitle').notNull().default('Latest releases and tracks'),
@@ -48,10 +56,26 @@ export const galleryImages = sqliteTable('gallery_images', {
 export const merchItems = sqliteTable('merch_items', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
+  description: text('description').notNull().default(''),
   price: real('price').notNull(),
   currency: text('currency').notNull().default('USD'),
   image: text('image').notNull().default(''),
   url: text('url'),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
+export const merchItemVariants = sqliteTable('merch_item_variants', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  merchItemId: integer('merch_item_id').notNull(),
+  label: text('label').notNull(),
+  inStock: integer('in_stock', { mode: 'boolean' }).notNull().default(true),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
+export const merchItemImages = sqliteTable('merch_item_images', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  merchItemId: integer('merch_item_id').notNull(),
+  url: text('url').notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
 });
 
@@ -104,4 +128,29 @@ export const siteSettings = sqliteTable('site_settings', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   key: text('key').notNull().unique(),
   value: text('value').notNull().default(''),
+});
+
+export const orders = sqliteTable('orders', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  customerName: text('customer_name').notNull(),
+  customerPhone: text('customer_phone').notNull(),
+  customerEmail: text('customer_email').notNull(),
+  customerAddress: text('customer_address').notNull(),
+  totalAmount: real('total_amount').notNull(),
+  currency: text('currency').notNull().default('KZT'),
+  status: text('status').notNull().default('pending'),
+  receiptUrl: text('receipt_url').notNull().default(''),
+  note: text('note').notNull().default(''),
+  createdAt: text('created_at').notNull(),
+});
+
+export const orderItems = sqliteTable('order_items', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  orderId: integer('order_id').notNull(),
+  merchItemId: integer('merch_item_id').notNull(),
+  variantId: integer('variant_id'),
+  name: text('name').notNull(),
+  variantLabel: text('variant_label').notNull().default(''),
+  price: real('price').notNull(),
+  quantity: integer('quantity').notNull().default(1),
 });
