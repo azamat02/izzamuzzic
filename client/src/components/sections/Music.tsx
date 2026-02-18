@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { SectionTitle } from '../ui/SectionTitle';
 import { usePublicData } from '../../hooks/useApi';
-import { getIcon, platformOptions } from '../../lib/iconMap';
+import { getIcon } from '../../lib/iconMap';
 
 interface ReleaseLink {
   id: number;
@@ -48,13 +48,15 @@ export function Music() {
             transition={{ duration: 0.6 }}
             className="group flex flex-col md:flex-row items-center gap-10 max-w-3xl mx-auto"
           >
-            <div className="relative w-72 h-72 md:w-80 md:h-80 shrink-0 overflow-hidden rounded-lg">
-              <img
-                src={release.cover}
-                alt={release.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-6">
+            <div className="shrink-0 flex flex-col items-center gap-4">
+              <div className="relative w-72 h-72 md:w-80 md:h-80 overflow-hidden rounded-lg">
+                <img
+                  src={release.cover}
+                  alt={release.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              </div>
+              <div className="flex gap-3">
                 {(release.links || []).map((link) => {
                   const Icon = getIcon(link.platform);
                   return (
@@ -63,9 +65,9 @@ export function Music() {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-white text-4xl hover:text-[#ff3c00] transition-colors"
+                      className="flex items-center justify-center w-10 h-10 border border-white/30 text-white rounded-full hover:bg-white/10 transition"
                     >
-                      <Icon />
+                      <Icon className="text-lg" />
                     </a>
                   );
                 })}
@@ -73,31 +75,9 @@ export function Music() {
             </div>
             <div className="text-center md:text-left">
               <h3 className="text-white font-bold text-3xl mb-2" style={{ fontFamily: 'var(--font-heading)' }}>{release.title}</h3>
-              <p className="text-[#a0a0a0] text-sm uppercase tracking-wider mb-6">
+              <p className="text-[#a0a0a0] text-sm uppercase tracking-wider">
                 {release.type} • {release.year}
               </p>
-              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                {(release.links || []).map((link, index) => {
-                  const Icon = getIcon(link.platform);
-                  const label = platformOptions.find(p => p.key === link.platform)?.label || 'Link';
-                  const isPrimary = index === 0;
-                  return (
-                    <a
-                      key={link.id}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={
-                        isPrimary
-                          ? 'flex items-center gap-2 bg-[#e63946] text-white px-6 py-3 rounded-full text-sm font-semibold hover:brightness-110 transition'
-                          : 'flex items-center gap-2 border border-white/30 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-white/10 transition'
-                      }
-                    >
-                      <Icon className="text-lg" /> {label}
-                    </a>
-                  );
-                })}
-              </div>
             </div>
           </motion.div>
         ))}
