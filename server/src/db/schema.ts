@@ -37,6 +37,7 @@ export const releaseLinks = sqliteTable('release_links', {
   releaseId: integer('release_id').notNull(),
   platform: text('platform').notNull(),
   url: text('url').notNull(),
+  hoverColor: text('hover_color'),
   sortOrder: integer('sort_order').notNull().default(0),
 });
 

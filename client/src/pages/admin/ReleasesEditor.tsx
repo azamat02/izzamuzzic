@@ -10,6 +10,7 @@ interface ReleaseLink {
   releaseId: number;
   platform: string;
   url: string;
+  hoverColor: string | null;
   sortOrder: number;
 }
 
@@ -58,6 +59,7 @@ export function ReleasesEditor() {
   const [linksOpenFor, setLinksOpenFor] = useState<number | null>(null);
   const [newLinkPlatform, setNewLinkPlatform] = useState(platformOptions[0].key);
   const [newLinkUrl, setNewLinkUrl] = useState('');
+  const [newLinkHoverColor, setNewLinkHoverColor] = useState('');
 
   const { data: releases = [], isLoading: releasesLoading } = useQuery({
     queryKey: ['releases'],
@@ -111,11 +113,20 @@ export function ReleasesEditor() {
   });
 
   const addLinkMutation = useMutation({
-    mutationFn: ({ releaseId, platform, url, sortOrder }: { releaseId: number; platform: string; url: string; sortOrder: number }) =>
-      api.post(`/releases/${releaseId}/links`, { platform, url, sortOrder }),
+    mutationFn: ({ releaseId, platform, url, hoverColor, sortOrder }: { releaseId: number; platform: string; url: string; hoverColor: string | null; sortOrder: number }) =>
+      api.post(`/releases/${releaseId}/links`, { platform, url, hoverColor, sortOrder }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['releases'] });
       setNewLinkUrl('');
+      setNewLinkHoverColor('');
+    },
+  });
+
+  const updateLinkMutation = useMutation({
+    mutationFn: ({ id, ...data }: { id: number; hoverColor: string | null }) =>
+      api.put(`/release-links/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['releases'] });
     },
   });
 
@@ -163,6 +174,7 @@ export function ReleasesEditor() {
       releaseId,
       platform: newLinkPlatform,
       url: newLinkUrl.trim(),
+      hoverColor: newLinkHoverColor.trim() || null,
       sortOrder: existingLinks.length,
     });
   };
@@ -259,6 +271,24 @@ export function ReleasesEditor() {
                 <Icon className="text-[#a0a0a0] text-lg shrink-0" />
                 <span className="text-[#a0a0a0] text-xs shrink-0">{platformLabel}</span>
                 <span className="text-white text-xs truncate flex-1">{link.url}</span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <input
+                    type="color"
+                    value={link.hoverColor || '#ffffff'}
+                    onChange={(e) => updateLinkMutation.mutate({ id: link.id, hoverColor: e.target.value })}
+                    className="w-6 h-6 rounded cursor-pointer bg-transparent border-0"
+                    title="Hover color"
+                  />
+                  {link.hoverColor && (
+                    <button
+                      onClick={() => updateLinkMutation.mutate({ id: link.id, hoverColor: null })}
+                      className="text-[#a0a0a0] hover:text-white text-[10px] transition-colors"
+                      title="Reset to default"
+                    >
+                      <HiOutlineX className="text-sm" />
+                    </button>
+                  )}
+                </div>
                 <button
                   onClick={() => handleDeleteLink(link.id)}
                   disabled={deleteLinkMutation.isPending}
@@ -271,7 +301,7 @@ export function ReleasesEditor() {
           })}
         </div>
       )}
-      <div className="flex gap-2 items-end">
+      <div className="flex gap-2 items-end flex-wrap">
         <div className="flex-shrink-0">
           <label className="block text-[#a0a0a0] text-xs mb-1">Platform</label>
           <select
@@ -284,7 +314,7 @@ export function ReleasesEditor() {
             ))}
           </select>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-[120px]">
           <label className="block text-[#a0a0a0] text-xs mb-1">URL</label>
           <input
             type="url"
@@ -292,6 +322,15 @@ export function ReleasesEditor() {
             onChange={(e) => setNewLinkUrl(e.target.value)}
             className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#e63946] transition-colors"
             placeholder="https://..."
+          />
+        </div>
+        <div className="flex-shrink-0">
+          <label className="block text-[#a0a0a0] text-xs mb-1">Hover Color</label>
+          <input
+            type="color"
+            value={newLinkHoverColor || '#e63946'}
+            onChange={(e) => setNewLinkHoverColor(e.target.value)}
+            className="w-full h-[38px] rounded-lg cursor-pointer bg-[#0a0a0a] border border-[#1a1a1a]"
           />
         </div>
         <button

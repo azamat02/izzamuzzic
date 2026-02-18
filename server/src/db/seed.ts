@@ -52,6 +52,7 @@ sqlite.exec(`
     release_id INTEGER NOT NULL,
     platform TEXT NOT NULL,
     url TEXT NOT NULL,
+    hover_color TEXT,
     sort_order INTEGER NOT NULL DEFAULT 0
   );
 

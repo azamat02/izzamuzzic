@@ -3,15 +3,15 @@ import { SectionTitle } from '../ui/SectionTitle';
 import { usePublicData } from '../../hooks/useApi';
 import { getIcon } from '../../lib/iconMap';
 
-const platformHoverColors: Record<string, string> = {
-  FaSpotify: 'hover:bg-[#1DB954] hover:border-[#1DB954]',
-  FaYoutube: 'hover:bg-[#FF0000] hover:border-[#FF0000]',
-  SiApplemusic: 'hover:bg-[#FA243C] hover:border-[#FA243C]',
-  FaSoundcloud: 'hover:bg-[#FF5500] hover:border-[#FF5500]',
-  FaDeezer: 'hover:bg-[#A238FF] hover:border-[#A238FF]',
-  SiTidal: 'hover:bg-[#000000] hover:border-[#ffffff]/30',
-  FaBandcamp: 'hover:bg-[#1DA0C3] hover:border-[#1DA0C3]',
-  FaYandex: 'hover:bg-[#FFCC00] hover:border-[#FFCC00]',
+const defaultPlatformColors: Record<string, string> = {
+  FaSpotify: '#1DB954',
+  FaYoutube: '#FF0000',
+  SiApplemusic: '#FA243C',
+  FaSoundcloud: '#FF5500',
+  FaDeezer: '#A238FF',
+  SiTidal: '#000000',
+  FaBandcamp: '#1DA0C3',
+  FaYandex: '#FFCC00',
 };
 
 interface ReleaseLink {
@@ -19,6 +19,7 @@ interface ReleaseLink {
   releaseId: number;
   platform: string;
   url: string;
+  hoverColor: string | null;
   sortOrder: number;
 }
 
@@ -57,39 +58,49 @@ export function Music() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="group flex flex-col md:flex-row items-center gap-10 max-w-3xl mx-auto"
+            className="group flex flex-col items-center gap-4 max-w-3xl mx-auto"
           >
-            <div className="shrink-0 flex flex-col items-center gap-4">
-              <div className="relative w-72 h-72 md:w-80 md:h-80 overflow-hidden rounded-lg">
+            {/* Row: cover + text, aligned by cover center */}
+            <div className="flex flex-col md:flex-row items-center gap-10">
+              <div className="shrink-0 relative w-72 h-72 md:w-80 md:h-80 overflow-hidden rounded-lg">
                 <img
                   src={release.cover}
                   alt={release.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
-              <div className="flex gap-3">
-                {(release.links || []).map((link) => {
-                  const Icon = getIcon(link.platform);
-                  const hoverColor = platformHoverColors[link.platform] || 'hover:bg-white/10 hover:border-white/30';
-                  return (
-                    <a
-                      key={link.id}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`flex items-center justify-center w-10 h-10 border border-transparent text-white rounded-full transition-all duration-300 ${hoverColor}`}
-                    >
-                      <Icon className="text-lg" />
-                    </a>
-                  );
-                })}
+              <div className="text-center md:text-left">
+                <h3 className="text-white font-bold text-3xl mb-2" style={{ fontFamily: 'var(--font-heading)' }}>{release.title}</h3>
+                <p className="text-[#a0a0a0] text-sm uppercase tracking-wider">
+                  {release.type} • {release.year}
+                </p>
               </div>
             </div>
-            <div className="text-center md:text-left">
-              <h3 className="text-white font-bold text-3xl mb-2" style={{ fontFamily: 'var(--font-heading)' }}>{release.title}</h3>
-              <p className="text-[#a0a0a0] text-sm uppercase tracking-wider">
-                {release.type} • {release.year}
-              </p>
+            {/* Platform buttons below cover */}
+            <div className="flex gap-3">
+              {(release.links || []).map((link) => {
+                const Icon = getIcon(link.platform);
+                const color = link.hoverColor || defaultPlatformColors[link.platform] || '#ffffff';
+                return (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-10 h-10 border border-transparent text-white rounded-full transition-all duration-300 hover:scale-110"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = color;
+                      e.currentTarget.style.borderColor = color;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.borderColor = 'transparent';
+                    }}
+                  >
+                    <Icon className="text-lg" />
+                  </a>
+                );
+              })}
             </div>
           </motion.div>
         ))}

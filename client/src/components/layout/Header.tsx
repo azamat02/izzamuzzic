@@ -76,15 +76,7 @@ export function Header() {
             </Link>
           </div>
 
-          <div className="lg:hidden flex items-center gap-2">
-            <Link to="/cart" className="relative text-white hover:text-[#e63946] transition-colors p-2">
-              <HiOutlineShoppingCart className="text-xl" />
-              {itemCount > 0 && (
-                <span className="absolute top-0 right-0 bg-[#e63946] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {itemCount}
-                </span>
-              )}
-            </Link>
+          <div className="lg:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-white text-2xl p-2"
@@ -118,6 +110,19 @@ export function Header() {
                   {item.label}
                 </motion.a>
               ))}
+              <Link
+                to="/cart"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="relative text-lg font-medium text-white hover:text-[#e63946] transition-colors uppercase tracking-wider flex items-center gap-2"
+              >
+                <HiOutlineShoppingCart className="text-xl" />
+                Cart
+                {itemCount > 0 && (
+                  <span className="bg-[#e63946] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {itemCount}
+                  </span>
+                )}
+              </Link>
               <SocialLinks size="md" className="mt-4" />
             </nav>
           </motion.div>
