@@ -125,14 +125,18 @@ export function HeroEditor() {
       setUploading(true);
       const isVideo = file.type.startsWith('video/');
 
+      const onProgress = (percent: number) => {
+        setUploadProgress(`Uploading ${file.name}... ${percent}%`);
+      };
+
       try {
         if (isVideo) {
-          setUploadProgress(`Uploading ${file.name}...`);
+          setUploadProgress(`Uploading ${file.name}... 0%`);
           const videoOptions: VideoUploadOptions | undefined = settings.compress
             ? { compressPreset: settings.preset }
             : undefined;
 
-          const result = await api.uploadVideo(file, videoOptions);
+          const result = await api.uploadVideo(file, videoOptions, onProgress);
 
           if ('compressing' in result && result.compressing) {
             pollVideoCompression(result.jobId, file.name);
@@ -150,12 +154,12 @@ export function HeroEditor() {
           queryClient.invalidateQueries({ queryKey: ['hero-media'] });
           toast('Media uploaded', 'success');
         } else {
-          setUploadProgress(`Uploading ${file.name}...`);
+          setUploadProgress(`Uploading ${file.name}... 0%`);
           const imageOptions: ImageUploadOptions | undefined = settings.compress
             ? { compressQuality: settings.quality, compressMaxWidth: settings.maxWidth }
             : undefined;
 
-          const result = await api.uploadFile(file, imageOptions);
+          const result = await api.uploadFile(file, imageOptions, onProgress);
 
           await api.post('/hero-media', {
             mediaUrl: result.url,

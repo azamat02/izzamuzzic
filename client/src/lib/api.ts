@@ -49,13 +49,51 @@ export interface CompressionJobStatus {
   error?: string;
 }
 
+function uploadWithProgress<T>(
+  url: string,
+  formData: FormData,
+  onProgress?: (percent: number) => void
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE}${url}`);
+
+    const token = localStorage.getItem('admin_token');
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+    if (onProgress) {
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          onProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
+    }
+
+    xhr.onload = () => {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(data);
+        } else {
+          reject(new Error(data.error || 'Upload failed'));
+        }
+      } catch {
+        reject(new Error('Upload failed'));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error('Upload failed'));
+    xhr.send(formData);
+  });
+}
+
 export const api = {
   get: <T>(url: string) => request<T>(url),
   post: <T>(url: string, data: unknown) => request<T>(url, { method: 'POST', body: JSON.stringify(data) }),
   put: <T>(url: string, data: unknown) => request<T>(url, { method: 'PUT', body: JSON.stringify(data) }),
   delete: <T>(url: string) => request<T>(url, { method: 'DELETE' }),
 
-  uploadFile: async (file: File, options?: ImageUploadOptions): Promise<UploadResult> => {
+  uploadFile: (file: File, options?: ImageUploadOptions, onProgress?: (percent: number) => void): Promise<UploadResult> => {
     const formData = new FormData();
     formData.append('file', file);
     if (options?.compressQuality != null) {
@@ -64,34 +102,16 @@ export const api = {
     if (options?.compressMaxWidth != null) {
       formData.append('compressMaxWidth', String(options.compressMaxWidth));
     }
-    const res = await fetch(`${API_BASE}/upload`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: formData,
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: 'Upload failed' }));
-      throw new Error(err.error || 'Upload failed');
-    }
-    return res.json();
+    return uploadWithProgress<UploadResult>('/upload', formData, onProgress);
   },
 
-  uploadVideo: async (file: File, options?: VideoUploadOptions): Promise<UploadResult | VideoJobResult> => {
+  uploadVideo: (file: File, options?: VideoUploadOptions, onProgress?: (percent: number) => void): Promise<UploadResult | VideoJobResult> => {
     const formData = new FormData();
     formData.append('file', file);
     if (options?.compressPreset) {
       formData.append('compressPreset', options.compressPreset);
     }
-    const res = await fetch(`${API_BASE}/upload/video`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: formData,
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: 'Video upload failed' }));
-      throw new Error(err.error || 'Video upload failed');
-    }
-    return res.json();
+    return uploadWithProgress<UploadResult | VideoJobResult>('/upload/video', formData, onProgress);
   },
 
   getCompressionStatus: async (jobId: string): Promise<CompressionJobStatus> => {

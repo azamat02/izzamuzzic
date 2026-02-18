@@ -16,13 +16,15 @@ interface ImageUploaderProps {
 export function ImageUploader({ value, onChange, className = '', enableCompression = false }: ImageUploaderProps) {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
+  const [uploadPercent, setUploadPercent] = useState(0);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const doUpload = async (file: File, options?: ImageUploadOptions) => {
     setUploading(true);
+    setUploadPercent(0);
     try {
-      const result = await api.uploadFile(file, options);
+      const result = await api.uploadFile(file, options, (p) => setUploadPercent(p));
       onChange(result.url);
       if (result.originalSize && result.compressedSize) {
         const saved = result.originalSize - result.compressedSize;
@@ -80,7 +82,10 @@ export function ImageUploader({ value, onChange, className = '', enableCompressi
           className="border-2 border-dashed border-[#1a1a1a] rounded-lg p-8 text-center cursor-pointer hover:border-[#e63946]/50 transition-colors"
         >
           {uploading ? (
-            <div className="w-6 h-6 border-2 border-[#e63946] border-t-transparent rounded-full animate-spin mx-auto" />
+            <div>
+              <div className="w-6 h-6 border-2 border-[#e63946] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-[#a0a0a0] text-xs">{uploadPercent}%</p>
+            </div>
           ) : (
             <>
               <HiOutlineUpload className="text-2xl text-[#a0a0a0] mx-auto mb-2" />
