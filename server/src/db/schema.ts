@@ -128,6 +128,15 @@ export const navigationItems = sqliteTable('navigation_items', {
 export const heroSettings = sqliteTable('hero_settings', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   videoUrl: text('video_url').notNull().default(''),
+  activeMediaId: integer('active_media_id'),
+});
+
+export const heroMedia = sqliteTable('hero_media', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  mediaUrl: text('media_url').notNull(),
+  mediaType: text('media_type').notNull(),
+  label: text('label').notNull().default(''),
+  createdAt: text('created_at').notNull(),
 });
 
 export const siteSettings = sqliteTable('site_settings', {

@@ -58,7 +58,7 @@ export function Music() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="group flex flex-col md:flex-row items-center gap-10 max-w-3xl mx-auto mb-8"
+            className="group flex flex-col md:flex-row items-center md:items-start gap-10 max-w-3xl mx-auto mb-8"
           >
             <div className="shrink-0 relative mb-12 md:mb-10">
               <div className="relative w-72 h-72 md:w-80 md:h-80 overflow-hidden rounded-lg">
@@ -94,7 +94,7 @@ export function Music() {
                 })}
               </div>
             </div>
-            <div className="text-center md:text-left">
+            <div className="text-center md:text-left md:h-80 md:flex md:flex-col md:justify-center">
               <h3 className="text-white font-bold text-3xl mb-2" style={{ fontFamily: 'var(--font-heading)' }}>{release.title}</h3>
               <p className="text-[#a0a0a0] text-sm uppercase tracking-wider">
                 {release.type} • {release.year}

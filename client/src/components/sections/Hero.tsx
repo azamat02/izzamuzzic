@@ -2,33 +2,53 @@ import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 
-interface HeroData {
+interface ActiveMedia {
+  id: number;
+  mediaUrl: string;
+  mediaType: string;
+  label: string;
+  createdAt: string;
+}
+
+interface HeroSettingsData {
   id: number;
   videoUrl: string;
+  activeMediaId: number | null;
+  activeMedia: ActiveMedia | null;
 }
 
 export function Hero() {
   const { data: heroSettings } = useQuery({
     queryKey: ['hero-settings'],
-    queryFn: () => api.get<HeroData | null>('/hero-settings'),
+    queryFn: () => api.get<HeroSettingsData | null>('/hero-settings'),
     staleTime: 5 * 60 * 1000,
   });
 
-  const videoSrc = heroSettings?.videoUrl || '/hero-video.mp4';
+  const activeMedia = heroSettings?.activeMedia;
+  const fallbackVideo = heroSettings?.videoUrl || '/hero-video.mp4';
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-[#282828]">
-      {/* Background video */}
-      <video
-        key={videoSrc}
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover"
-      >
-        <source src={videoSrc} type="video/mp4" />
-      </video>
+      {/* Background media */}
+      {activeMedia?.mediaType === 'image' ? (
+        <img
+          key={activeMedia.mediaUrl}
+          src={activeMedia.mediaUrl}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : (
+        <video
+          key={activeMedia?.mediaUrl || fallbackVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src={activeMedia?.mediaUrl || fallbackVideo} type="video/mp4" />
+        </video>
+      )}
       {/* Bottom gradient — smooth transition to the next section */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
 

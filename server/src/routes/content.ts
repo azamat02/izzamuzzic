@@ -369,7 +369,15 @@ router.delete('/navigation/:id', authMiddleware, (req, res) => {
 // ============ HERO SETTINGS ============
 router.get('/hero-settings', (_req, res) => {
   const data = db.select().from(schema.heroSettings).get();
-  res.json(data || null);
+  if (!data) {
+    res.json(null);
+    return;
+  }
+  let activeMedia = null;
+  if (data.activeMediaId) {
+    activeMedia = db.select().from(schema.heroMedia).where(eq(schema.heroMedia.id, data.activeMediaId)).get() || null;
+  }
+  res.json({ ...data, activeMedia });
 });
 
 router.put('/hero-settings', authMiddleware, (req, res) => {
@@ -381,6 +389,43 @@ router.put('/hero-settings', authMiddleware, (req, res) => {
   }
   const data = db.select().from(schema.heroSettings).get();
   res.json(data);
+});
+
+// ============ HERO MEDIA ============
+router.get('/hero-media', authMiddleware, (_req, res) => {
+  const data = db.select().from(schema.heroMedia).orderBy(desc(schema.heroMedia.id)).all();
+  res.json(data);
+});
+
+router.post('/hero-media', authMiddleware, (req, res) => {
+  const result = db.insert(schema.heroMedia).values(req.body).returning().get();
+  res.status(201).json(result);
+});
+
+router.put('/hero-media/:id/activate', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id as string);
+  const media = db.select().from(schema.heroMedia).where(eq(schema.heroMedia.id, id)).get();
+  if (!media) {
+    res.status(404).json({ error: 'Media not found' });
+    return;
+  }
+  const settings = db.select().from(schema.heroSettings).get();
+  if (settings) {
+    db.update(schema.heroSettings).set({ activeMediaId: id }).where(eq(schema.heroSettings.id, settings.id)).run();
+  } else {
+    db.insert(schema.heroSettings).values({ activeMediaId: id }).run();
+  }
+  res.json({ success: true });
+});
+
+router.delete('/hero-media/:id', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id as string);
+  const settings = db.select().from(schema.heroSettings).get();
+  if (settings && settings.activeMediaId === id) {
+    db.update(schema.heroSettings).set({ activeMediaId: null }).where(eq(schema.heroSettings.id, settings.id)).run();
+  }
+  db.delete(schema.heroMedia).where(eq(schema.heroMedia.id, id)).run();
+  res.json({ success: true });
 });
 
 // ============ SITE SETTINGS ============
