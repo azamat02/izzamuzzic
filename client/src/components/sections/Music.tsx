@@ -57,21 +57,15 @@ export function Music() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="group flex flex-col items-center gap-6 max-w-3xl mx-auto"
+            className="group flex flex-col md:flex-row items-center gap-10 max-w-3xl mx-auto"
           >
-            <div className="flex flex-col items-center gap-4">
+            <div className="shrink-0 flex flex-col items-center gap-4">
               <div className="relative w-72 h-72 md:w-80 md:h-80 overflow-hidden rounded-lg">
                 <img
                   src={release.cover}
                   alt={release.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-              </div>
-              <div className="text-center">
-                <h3 className="text-white font-bold text-3xl mb-2" style={{ fontFamily: 'var(--font-heading)' }}>{release.title}</h3>
-                <p className="text-[#a0a0a0] text-sm uppercase tracking-wider">
-                  {release.type} • {release.year}
-                </p>
               </div>
               <div className="flex gap-3">
                 {(release.links || []).map((link) => {
@@ -90,6 +84,12 @@ export function Music() {
                   );
                 })}
               </div>
+            </div>
+            <div className="text-center md:text-left">
+              <h3 className="text-white font-bold text-3xl mb-2" style={{ fontFamily: 'var(--font-heading)' }}>{release.title}</h3>
+              <p className="text-[#a0a0a0] text-sm uppercase tracking-wider">
+                {release.type} • {release.year}
+              </p>
             </div>
           </motion.div>
         ))}
