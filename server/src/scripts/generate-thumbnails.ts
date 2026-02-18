@@ -22,7 +22,8 @@ async function main() {
     const base = path.basename(filename, ext);
     const thumbPath = path.join(uploadsDir, `thumb_${base}.jpg`);
 
-    if (fs.existsSync(thumbPath)) {
+    const forceRegenerate = process.argv.includes('--force');
+    if (!forceRegenerate && fs.existsSync(thumbPath)) {
       skipped++;
       continue;
     }

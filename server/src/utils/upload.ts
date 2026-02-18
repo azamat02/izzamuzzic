@@ -56,8 +56,8 @@ export async function generateThumbnail(filename: string): Promise<string> {
   const outputPath = path.join(uploadsDir, thumbFilename);
 
   await sharp(inputPath)
-    .resize(400, undefined, { withoutEnlargement: true })
-    .jpeg({ quality: 75 })
+    .resize(800, undefined, { withoutEnlargement: true })
+    .jpeg({ quality: 85 })
     .toFile(outputPath);
 
   return thumbFilename;
