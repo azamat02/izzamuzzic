@@ -9,24 +9,10 @@ import { Merch } from '../components/sections/Merch';
 import { Contact } from '../components/sections/Contact';
 import { Tour } from '../components/sections/Tour';
 import { Press } from '../components/sections/Press';
-import { usePublicData } from '../hooks/useApi';
-
-interface NavigationItem {
-  id: number;
-  label: string;
-  href: string;
-  visible: boolean;
-  sortOrder: number;
-}
+import { useNavigationVisibility } from '../hooks/useNavigationVisibility';
 
 export function PublicSite() {
-  const { data: navItems } = usePublicData<NavigationItem[]>('navigation', '/navigation');
-
-  const isSectionVisible = (href: string) => {
-    if (!navItems) return false;
-    const item = navItems.find(n => n.href === href);
-    return item?.visible ?? false;
-  };
+  const { isSectionVisible } = useNavigationVisibility();
 
   return (
     <motion.div
@@ -37,13 +23,13 @@ export function PublicSite() {
       <Header />
       <main>
         <Hero />
-        <Music />
-        <About />
+        {isSectionVisible('#music') && <Music />}
+        {isSectionVisible('#about') && <About />}
         {isSectionVisible('#tour') && <Tour />}
-        <Gallery />
-        <Merch />
+        {isSectionVisible('#gallery') && <Gallery />}
+        {isSectionVisible('#merch') && <Merch />}
         {isSectionVisible('#press') && <Press />}
-        <Contact />
+        {isSectionVisible('#contact') && <Contact />}
       </main>
       <Footer />
     </motion.div>

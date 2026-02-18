@@ -19,6 +19,7 @@ import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { AdminProtectedRoute } from './components/admin/AdminProtectedRoute';
+import { SectionGuard } from './components/SectionGuard';
 import { AuthProvider } from './lib/auth';
 import { CartProvider } from './lib/cart';
 import { AccentColorProvider } from './lib/accentColor';
@@ -32,11 +33,11 @@ function App() {
       <ToastProvider>
       <Routes>
         <Route path="/" element={<PublicSite />} />
-        <Route path="/gallery" element={<GalleryPage />} />
-        <Route path="/merch" element={<MerchPage />} />
-        <Route path="/merch/:id" element={<MerchItemPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/gallery" element={<SectionGuard href="#gallery"><GalleryPage /></SectionGuard>} />
+        <Route path="/merch" element={<SectionGuard href="#merch"><MerchPage /></SectionGuard>} />
+        <Route path="/merch/:id" element={<SectionGuard href="#merch"><MerchItemPage /></SectionGuard>} />
+        <Route path="/cart" element={<SectionGuard href="#merch"><CartPage /></SectionGuard>} />
+        <Route path="/checkout" element={<SectionGuard href="#merch"><CheckoutPage /></SectionGuard>} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
           <Route index element={<AdminDashboard />} />

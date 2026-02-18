@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { HiMenu, HiX, HiOutlineShoppingCart } from 'react-icons/hi';
 import { SocialLinks } from '../ui/SocialLinks';
+import { useNavigationVisibility } from '../../hooks/useNavigationVisibility';
 import { usePublicData } from '../../hooks/useApi';
 import { useCart } from '../../lib/cart';
 
@@ -18,11 +19,13 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data: navItems } = usePublicData<NavigationItem[]>('navigation', '/navigation');
+  const { isSectionVisible } = useNavigationVisibility();
 
   const { itemCount } = useCart();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const visibleItems = (navItems || []).filter(item => item.visible);
+  const isMerchVisible = isSectionVisible('#merch');
 
   const getNavHref = (href: string) => {
     if (isHomePage) return href;
@@ -66,14 +69,16 @@ export function Header() {
 
           <div className="hidden lg:flex items-center gap-4">
             <SocialLinks size="sm" />
-            <Link to="/cart" className="relative text-white hover:text-[var(--color-accent)] transition-colors">
-              <HiOutlineShoppingCart className="text-xl" />
-              {itemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[var(--color-accent)] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {itemCount}
-                </span>
-              )}
-            </Link>
+            {isMerchVisible && (
+              <Link to="/cart" className="relative text-white hover:text-[var(--color-accent)] transition-colors">
+                <HiOutlineShoppingCart className="text-xl" />
+                {itemCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-[var(--color-accent)] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {itemCount}
+                  </span>
+                )}
+              </Link>
+            )}
           </div>
 
           <div className="lg:hidden">
@@ -110,19 +115,21 @@ export function Header() {
                   {item.label}
                 </motion.a>
               ))}
-              <Link
-                to="/cart"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="relative text-lg font-medium text-white hover:text-[var(--color-accent)] transition-colors uppercase tracking-wider flex items-center gap-2"
-              >
-                <HiOutlineShoppingCart className="text-xl" />
-                Cart
-                {itemCount > 0 && (
-                  <span className="bg-[var(--color-accent)] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                    {itemCount}
-                  </span>
-                )}
-              </Link>
+              {isMerchVisible && (
+                <Link
+                  to="/cart"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="relative text-lg font-medium text-white hover:text-[var(--color-accent)] transition-colors uppercase tracking-wider flex items-center gap-2"
+                >
+                  <HiOutlineShoppingCart className="text-xl" />
+                  Cart
+                  {itemCount > 0 && (
+                    <span className="bg-[var(--color-accent)] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                      {itemCount}
+                    </span>
+                  )}
+                </Link>
+              )}
               <SocialLinks size="md" className="mt-4" />
             </nav>
           </motion.div>
