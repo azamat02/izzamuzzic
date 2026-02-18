@@ -58,49 +58,47 @@ export function Music() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="group flex flex-col items-center gap-4 max-w-3xl mx-auto"
+            className="group flex flex-col md:flex-row items-center gap-10 max-w-3xl mx-auto mb-8"
           >
-            {/* Row: cover + text, aligned by cover center */}
-            <div className="flex flex-col md:flex-row items-center gap-10">
-              <div className="shrink-0 relative w-72 h-72 md:w-80 md:h-80 overflow-hidden rounded-lg">
+            <div className="shrink-0 relative mb-12 md:mb-10">
+              <div className="relative w-72 h-72 md:w-80 md:h-80 overflow-hidden rounded-lg">
                 <img
                   src={release.cover}
                   alt={release.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
-              <div className="text-center md:text-left">
-                <h3 className="text-white font-bold text-3xl mb-2" style={{ fontFamily: 'var(--font-heading)' }}>{release.title}</h3>
-                <p className="text-[#a0a0a0] text-sm uppercase tracking-wider">
-                  {release.type} • {release.year}
-                </p>
+              <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 flex gap-3">
+                {(release.links || []).map((link) => {
+                  const Icon = getIcon(link.platform);
+                  const color = link.hoverColor || defaultPlatformColors[link.platform] || '#ffffff';
+                  return (
+                    <a
+                      key={link.id}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center w-10 h-10 border border-transparent text-white rounded-full transition-all duration-300 hover:scale-110"
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = color;
+                        e.currentTarget.style.borderColor = color;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.borderColor = 'transparent';
+                      }}
+                    >
+                      <Icon className="text-lg" />
+                    </a>
+                  );
+                })}
               </div>
             </div>
-            {/* Platform buttons below cover */}
-            <div className="flex gap-3">
-              {(release.links || []).map((link) => {
-                const Icon = getIcon(link.platform);
-                const color = link.hoverColor || defaultPlatformColors[link.platform] || '#ffffff';
-                return (
-                  <a
-                    key={link.id}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center w-10 h-10 border border-transparent text-white rounded-full transition-all duration-300 hover:scale-110"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = color;
-                      e.currentTarget.style.borderColor = color;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.borderColor = 'transparent';
-                    }}
-                  >
-                    <Icon className="text-lg" />
-                  </a>
-                );
-              })}
+            <div className="text-center md:text-left">
+              <h3 className="text-white font-bold text-3xl mb-2" style={{ fontFamily: 'var(--font-heading)' }}>{release.title}</h3>
+              <p className="text-[#a0a0a0] text-sm uppercase tracking-wider">
+                {release.type} • {release.year}
+              </p>
             </div>
           </motion.div>
         ))}
