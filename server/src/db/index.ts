@@ -11,5 +11,13 @@ const sqlite = new Database(dbPath);
 sqlite.pragma('journal_mode = WAL');
 sqlite.pragma('foreign_keys = ON');
 
+// Auto-migrate: create tables that may not exist yet
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS hero_settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    video_url TEXT NOT NULL DEFAULT ''
+  );
+`);
+
 export const db = drizzle(sqlite, { schema });
 export { schema };

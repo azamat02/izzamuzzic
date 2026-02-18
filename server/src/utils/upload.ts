@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const imageFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
   if (allowed.includes(file.mimetype)) {
     cb(null, true);
@@ -27,10 +27,25 @@ const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterC
   }
 };
 
+const videoFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowed = ['video/mp4', 'video/webm', 'video/quicktime'];
+  if (allowed.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only video files are allowed (mp4, webm, mov)'));
+  }
+};
+
 export const upload = multer({
   storage,
-  fileFilter,
+  fileFilter: imageFilter,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+});
+
+export const videoUpload = multer({
+  storage,
+  fileFilter: videoFilter,
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
 });
 
 export async function generateThumbnail(filename: string): Promise<string> {

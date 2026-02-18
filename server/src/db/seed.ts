@@ -139,6 +139,11 @@ sqlite.exec(`
     sort_order INTEGER NOT NULL DEFAULT 0
   );
 
+  CREATE TABLE IF NOT EXISTS hero_settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    video_url TEXT NOT NULL DEFAULT ''
+  );
+
   CREATE TABLE IF NOT EXISTS site_settings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     key TEXT NOT NULL UNIQUE,

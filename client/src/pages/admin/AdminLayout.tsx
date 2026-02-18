@@ -5,11 +5,12 @@ import {
   HiOutlineHome, HiOutlineUser, HiOutlineMusicNote, HiOutlinePhotograph,
   HiOutlineShoppingBag, HiOutlineClipboardList,
   HiOutlineMail, HiOutlineGlobe, HiOutlineMenu as HiOutlineNavigation,
-  HiOutlineCog, HiOutlineLogout, HiOutlineX, HiMenu,
+  HiOutlineCog, HiOutlineLogout, HiOutlineX, HiMenu, HiOutlineFilm,
 } from 'react-icons/hi';
 
 const navItems = [
   { label: 'Dashboard', path: '/admin', icon: HiOutlineHome, end: true },
+  { label: 'Hero', path: '/admin/hero', icon: HiOutlineFilm },
   { label: 'About', path: '/admin/about', icon: HiOutlineUser },
   { label: 'Releases', path: '/admin/releases', icon: HiOutlineMusicNote },
   { label: 'Gallery', path: '/admin/gallery', icon: HiOutlinePhotograph },

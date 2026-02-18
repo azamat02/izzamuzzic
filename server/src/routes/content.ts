@@ -366,6 +366,23 @@ router.delete('/navigation/:id', authMiddleware, (req, res) => {
   res.json({ success: true });
 });
 
+// ============ HERO SETTINGS ============
+router.get('/hero-settings', (_req, res) => {
+  const data = db.select().from(schema.heroSettings).get();
+  res.json(data || null);
+});
+
+router.put('/hero-settings', authMiddleware, (req, res) => {
+  const existing = db.select().from(schema.heroSettings).get();
+  if (existing) {
+    db.update(schema.heroSettings).set(req.body).where(eq(schema.heroSettings.id, existing.id)).run();
+  } else {
+    db.insert(schema.heroSettings).values(req.body).run();
+  }
+  const data = db.select().from(schema.heroSettings).get();
+  res.json(data);
+});
+
 // ============ SITE SETTINGS ============
 router.get('/settings', (_req, res) => {
   const data = db.select().from(schema.siteSettings).all();

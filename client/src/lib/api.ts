@@ -39,6 +39,18 @@ export const api = {
     return res.json();
   },
 
+  uploadVideo: async (file: File): Promise<{ url: string; filename: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${API_BASE}/upload/video`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: formData,
+    });
+    if (!res.ok) throw new Error('Video upload failed');
+    return res.json();
+  },
+
   login: (username: string, password: string) =>
     request<{ token: string }>('/auth/login', {
       method: 'POST',

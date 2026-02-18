@@ -124,6 +124,11 @@ export const navigationItems = sqliteTable('navigation_items', {
   sortOrder: integer('sort_order').notNull().default(0),
 });
 
+export const heroSettings = sqliteTable('hero_settings', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  videoUrl: text('video_url').notNull().default(''),
+});
+
 export const siteSettings = sqliteTable('site_settings', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   key: text('key').notNull().unique(),
