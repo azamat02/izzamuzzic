@@ -16,6 +16,7 @@ import { SiteSettingsEditor } from './pages/admin/SiteSettingsEditor';
 import { OrdersEditor } from './pages/admin/OrdersEditor';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
+import { GalleryPage } from './pages/GalleryPage';
 import { AdminProtectedRoute } from './components/admin/AdminProtectedRoute';
 import { AuthProvider } from './lib/auth';
 import { CartProvider } from './lib/cart';
@@ -28,6 +29,7 @@ function App() {
       <ToastProvider>
       <Routes>
         <Route path="/" element={<PublicSite />} />
+        <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/merch" element={<MerchPage />} />
         <Route path="/merch/:id" element={<MerchItemPage />} />
         <Route path="/cart" element={<CartPage />} />

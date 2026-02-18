@@ -1,15 +1,22 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
-import { upload } from '../utils/upload.js';
+import { upload, generateThumbnail } from '../utils/upload.js';
 
 const router = Router();
 
-router.post('/', authMiddleware, upload.single('file'), (req, res) => {
+router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
   if (!req.file) {
     res.status(400).json({ error: 'No file uploaded' });
     return;
   }
   const url = `/uploads/${req.file.filename}`;
+
+  try {
+    await generateThumbnail(req.file.filename);
+  } catch {
+    // Non-fatal: thumbnail generation failed, original still works
+  }
+
   res.json({ url, filename: req.file.filename });
 });
 

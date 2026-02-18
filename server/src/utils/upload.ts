@@ -2,9 +2,10 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
+import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+export const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
@@ -31,3 +32,18 @@ export const upload = multer({
   fileFilter,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
 });
+
+export async function generateThumbnail(filename: string): Promise<string> {
+  const ext = path.extname(filename);
+  const base = path.basename(filename, ext);
+  const thumbFilename = `thumb_${base}.jpg`;
+  const inputPath = path.join(uploadsDir, filename);
+  const outputPath = path.join(uploadsDir, thumbFilename);
+
+  await sharp(inputPath)
+    .resize(400, undefined, { withoutEnlargement: true })
+    .jpeg({ quality: 75 })
+    .toFile(outputPath);
+
+  return thumbFilename;
+}

@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { SectionTitle } from '../ui/SectionTitle';
 import { usePublicData } from '../../hooks/useApi';
+import { getThumbnailUrl } from '../../lib/image';
 
 interface GalleryImage {
   id: number;
@@ -13,6 +15,8 @@ export function Gallery() {
   const { data: images } = usePublicData<GalleryImage[]>('gallery', '/gallery');
   const { data: settings } = usePublicData<Record<string, string>>('settings', '/settings');
 
+  const displayImages = (images || []).slice(0, 6);
+
   return (
     <section id="gallery" className="py-24 bg-[#141414] w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -22,7 +26,7 @@ export function Gallery() {
         />
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {(images || []).map((image, index) => (
+          {displayImages.map((image, index) => (
             <motion.div
               key={image.id}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -32,8 +36,15 @@ export function Gallery() {
               className="group relative aspect-[3/2] overflow-hidden rounded-lg cursor-pointer"
             >
               <img
-                src={image.src}
+                src={getThumbnailUrl(image.src)}
                 alt={image.alt}
+                loading="lazy"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  if (img.src !== image.src) {
+                    img.src = image.src;
+                  }
+                }}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -44,6 +55,17 @@ export function Gallery() {
             </motion.div>
           ))}
         </div>
+
+        {(images || []).length > 6 && (
+          <div className="text-center mt-8">
+            <Link
+              to="/gallery"
+              className="inline-block border border-white/30 text-white text-sm uppercase tracking-wider px-8 py-3 rounded-lg hover:border-[#e63946] hover:text-[#e63946] transition-colors"
+            >
+              View All
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );
