@@ -46,7 +46,7 @@ export function Header() {
       animate={{ y: 0 }}
       transition={{ duration: 0.6 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full ${
-        isScrolled ? 'bg-[#0a0a0a]/95 backdrop-blur-md shadow-lg' : 'bg-gradient-to-b from-black/60 to-transparent'
+        isScrolled ? 'bg-[#0a0a0a]/95 backdrop-blur-md shadow-lg' : ''
       }`}
     >
       <div className="w-full px-6 sm:px-10 lg:px-16">
@@ -60,7 +60,8 @@ export function Header() {
               <a
                 key={item.id}
                 href={getNavHref(item.href)}
-                className="text-sm font-medium text-white hover:text-[var(--color-accent)] transition-colors duration-300 uppercase tracking-wider"
+                className="text-sm font-medium hover:text-[var(--color-accent)] transition-colors duration-300 uppercase tracking-wider"
+                style={{ color: 'var(--color-navbar-text, #ffffff)' }}
               >
                 {item.label}
               </a>
@@ -68,9 +69,9 @@ export function Header() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-4">
-            <SocialLinks size="sm" />
+            <SocialLinks size="sm" color="var(--color-navbar-text, #ffffff)" />
             {isMerchVisible && (
-              <Link to="/cart" className="relative text-white hover:text-[var(--color-accent)] transition-colors">
+              <Link to="/cart" className="relative hover:text-[var(--color-accent)] transition-colors" style={{ color: 'var(--color-navbar-text, #ffffff)' }}>
                 <HiOutlineShoppingCart className="text-xl" />
                 {itemCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-[var(--color-accent)] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
@@ -84,7 +85,8 @@ export function Header() {
           <div className="lg:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-white text-2xl p-2"
+              className="text-2xl p-2"
+              style={{ color: 'var(--color-navbar-text, #ffffff)' }}
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? <HiX /> : <HiMenu />}

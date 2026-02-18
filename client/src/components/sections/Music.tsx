@@ -75,11 +75,9 @@ export function Music() {
                     rel="noopener noreferrer"
                     className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/50 transition-all duration-300"
                   >
-                    <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300">
-                      <svg viewBox="0 0 24 24" className="w-7 h-7 ml-1 text-black" fill="currentColor">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
+                    <span className="text-white text-lg font-bold tracking-widest opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300" style={{ fontFamily: 'var(--font-heading)' }}>
+                      PLAY
+                    </span>
                   </a>
                 )}
               </div>

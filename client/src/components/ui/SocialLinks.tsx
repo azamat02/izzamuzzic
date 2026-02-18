@@ -13,9 +13,10 @@ interface SocialLink {
 interface SocialLinksProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  color?: string;
 }
 
-export function SocialLinks({ size = 'md', className = '' }: SocialLinksProps) {
+export function SocialLinks({ size = 'md', className = '', color }: SocialLinksProps) {
   const { data: socials } = usePublicData<SocialLink[]>('socials', '/socials');
 
   const sizes = {
@@ -36,7 +37,8 @@ export function SocialLinks({ size = 'md', className = '' }: SocialLinksProps) {
             href={social.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${sizes[size]} text-white hover:text-[var(--color-accent)] transition-colors duration-300`}
+            className={`${sizes[size]} hover:text-[var(--color-accent)] transition-colors duration-300`}
+            style={{ color: color || undefined }}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}

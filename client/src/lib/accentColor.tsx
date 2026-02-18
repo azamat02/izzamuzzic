@@ -17,11 +17,17 @@ export function AccentColorProvider({ children }: { children: React.ReactNode })
 
   const accent = settings?.accentColor || DEFAULT_ACCENT;
   const accentLight = lightenColor(accent);
+  const navbarTextColor = settings?.navbarTextColor || '';
 
   useEffect(() => {
     document.documentElement.style.setProperty('--color-accent', accent);
     document.documentElement.style.setProperty('--color-accent-light', accentLight);
-  }, [accent, accentLight]);
+    if (navbarTextColor) {
+      document.documentElement.style.setProperty('--color-navbar-text', navbarTextColor);
+    } else {
+      document.documentElement.style.removeProperty('--color-navbar-text');
+    }
+  }, [accent, accentLight, navbarTextColor]);
 
   return (
     <AccentColorContext.Provider value={{ accent, accentLight }}>

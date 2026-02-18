@@ -64,7 +64,8 @@ export function SiteSettingsEditor() {
 
   const accentColor = form.accentColor || DEFAULT_ACCENT;
   const accentLight = lightenColor(accentColor);
-  const keys = Object.keys(form).filter(k => k !== 'accentColor');
+  const navbarTextColor = form.navbarTextColor || '#ffffff';
+  const keys = Object.keys(form).filter(k => k !== 'accentColor' && k !== 'navbarTextColor');
 
   const handleAccentChange = (color: string) => {
     setForm((prev) => ({ ...prev, accentColor: color }));
@@ -74,6 +75,18 @@ export function SiteSettingsEditor() {
     setForm((prev) => {
       const updated = { ...prev };
       delete updated.accentColor;
+      return updated;
+    });
+  };
+
+  const handleNavbarTextChange = (color: string) => {
+    setForm((prev) => ({ ...prev, navbarTextColor: color }));
+  };
+
+  const handleNavbarTextReset = () => {
+    setForm((prev) => {
+      const updated = { ...prev };
+      delete updated.navbarTextColor;
       return updated;
     });
   };
@@ -114,6 +127,41 @@ export function SiteSettingsEditor() {
           {form.accentColor && (
             <button
               onClick={handleAccentReset}
+              className="text-[#a0a0a0] hover:text-white text-sm transition-colors"
+            >
+              Reset to default
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Navbar Text Color */}
+      <div className="bg-[#141414] border border-[#1a1a1a] rounded-lg p-5 mb-8">
+        <h2 className="text-white text-sm font-medium mb-4">Navbar Text & Icons Color</h2>
+        <div className="flex items-center gap-4 flex-wrap">
+          <input
+            type="color"
+            value={navbarTextColor}
+            onChange={(e) => handleNavbarTextChange(e.target.value)}
+            className="w-10 h-10 rounded-lg border border-[#1a1a1a] cursor-pointer bg-transparent"
+          />
+          <input
+            type="text"
+            value={navbarTextColor}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (/^#[0-9a-fA-F]{0,6}$/.test(v)) handleNavbarTextChange(v);
+            }}
+            maxLength={7}
+            className="w-28 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-[#e63946] transition-colors"
+          />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded border border-[#333]" style={{ backgroundColor: navbarTextColor }} title="Navbar text" />
+            <span className="text-[#a0a0a0] text-xs ml-1">Preview</span>
+          </div>
+          {form.navbarTextColor && (
+            <button
+              onClick={handleNavbarTextReset}
               className="text-[#a0a0a0] hover:text-white text-sm transition-colors"
             >
               Reset to default
