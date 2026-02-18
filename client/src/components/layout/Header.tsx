@@ -47,17 +47,17 @@ export function Header() {
       }`}
     >
       <div className="w-full px-6 sm:px-10 lg:px-16">
-        <div className="flex items-center justify-between h-20 w-full">
+        <div className="relative flex items-center justify-between h-20 w-full">
           <Link to="/" className="hover:opacity-80 transition-opacity">
             <img src="/logo_white.png" alt="IZZAMUZZIC" className="h-16" />
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             {visibleItems.map((item) => (
               <a
                 key={item.id}
                 href={getNavHref(item.href)}
-                className="text-sm font-medium text-white hover:text-[#ff3c00] transition-colors duration-300 uppercase tracking-wider"
+                className="text-sm font-medium text-white hover:text-[#e63946] transition-colors duration-300 uppercase tracking-wider"
               >
                 {item.label}
               </a>
@@ -66,7 +66,7 @@ export function Header() {
 
           <div className="hidden lg:flex items-center gap-4">
             <SocialLinks size="sm" />
-            <Link to="/cart" className="relative text-white hover:text-[#ff3c00] transition-colors">
+            <Link to="/cart" className="relative text-white hover:text-[#e63946] transition-colors">
               <HiOutlineShoppingCart className="text-xl" />
               {itemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-[#e63946] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
@@ -77,7 +77,7 @@ export function Header() {
           </div>
 
           <div className="lg:hidden flex items-center gap-2">
-            <Link to="/cart" className="relative text-white hover:text-[#ff3c00] transition-colors p-2">
+            <Link to="/cart" className="relative text-white hover:text-[#e63946] transition-colors p-2">
               <HiOutlineShoppingCart className="text-xl" />
               {itemCount > 0 && (
                 <span className="absolute top-0 right-0 bg-[#e63946] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
@@ -113,7 +113,7 @@ export function Header() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-lg font-medium text-white hover:text-[#ff3c00] transition-colors uppercase tracking-wider"
+                  className="text-lg font-medium text-white hover:text-[#e63946] transition-colors uppercase tracking-wider"
                 >
                   {item.label}
                 </motion.a>
