@@ -1,8 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
+import type { UploadResult, ImageUploadOptions, VideoUploadOptions } from '../../lib/api';
 import { useToast } from '../../components/admin/Toast';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
+import { CompressionModal } from '../../components/admin/CompressionModal';
+import type { CompressionSettings } from '../../components/admin/CompressionModal';
 import { HiOutlineUpload, HiOutlineTrash, HiOutlineCheck } from 'react-icons/hi';
 
 interface HeroMediaItem {
@@ -19,13 +22,21 @@ interface HeroSettingsData {
   activeMediaId: number | null;
 }
 
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export function HeroEditor() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<HeroMediaItem | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { data: heroSettings } = useQuery({
     queryKey: ['hero-settings'],
@@ -56,36 +67,145 @@ export function HeroEditor() {
     },
   });
 
-  const handleUpload = async (file: File) => {
-    setUploading(true);
-    const isVideo = file.type.startsWith('video/');
-    setUploadProgress(`Uploading ${file.name}...`);
-    try {
-      const result = isVideo
-        ? await api.uploadVideo(file)
-        : await api.uploadFile(file);
+  // Clean up polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, []);
 
-      await api.post('/hero-media', {
-        mediaUrl: result.url,
-        mediaType: isVideo ? 'video' : 'image',
-        label: file.name,
-        createdAt: new Date().toISOString(),
-      });
+  const pollVideoCompression = useCallback(
+    (jobId: string, fileName: string) => {
+      setUploadProgress('Compressing video... 0%');
 
-      queryClient.invalidateQueries({ queryKey: ['hero-media'] });
-      toast('Media uploaded', 'success');
-    } catch {
-      toast('Upload failed. Check file format and size.', 'error');
-    } finally {
-      setUploading(false);
-      setUploadProgress('');
+      pollRef.current = setInterval(async () => {
+        try {
+          const status = await api.getCompressionStatus(jobId);
+
+          if (status.status === 'compressing') {
+            setUploadProgress(`Compressing video... ${status.progress}%`);
+            return;
+          }
+
+          if (pollRef.current) clearInterval(pollRef.current);
+          pollRef.current = null;
+
+          if (status.status === 'done' && status.result) {
+            await api.post('/hero-media', {
+              mediaUrl: status.result.url,
+              mediaType: 'video',
+              label: fileName,
+              createdAt: new Date().toISOString(),
+            });
+            queryClient.invalidateQueries({ queryKey: ['hero-media'] });
+
+            const saved = status.result.originalSize - status.result.compressedSize;
+            toast(
+              `Video compressed: ${formatSize(status.result.originalSize)} → ${formatSize(status.result.compressedSize)} (saved ${formatSize(saved)})`,
+              'success'
+            );
+          } else {
+            toast(status.error || 'Video compression failed', 'error');
+          }
+        } catch {
+          if (pollRef.current) clearInterval(pollRef.current);
+          pollRef.current = null;
+          toast('Failed to check compression status', 'error');
+        } finally {
+          setUploading(false);
+          setUploadProgress('');
+        }
+      }, 2000);
+    },
+    [queryClient, toast]
+  );
+
+  const handleUploadWithSettings = useCallback(
+    async (file: File, settings: CompressionSettings) => {
+      setUploading(true);
+      const isVideo = file.type.startsWith('video/');
+
+      try {
+        if (isVideo) {
+          setUploadProgress(`Uploading ${file.name}...`);
+          const videoOptions: VideoUploadOptions | undefined = settings.compress
+            ? { compressPreset: settings.preset }
+            : undefined;
+
+          const result = await api.uploadVideo(file, videoOptions);
+
+          if ('compressing' in result && result.compressing) {
+            pollVideoCompression(result.jobId, file.name);
+            return; // Don't reset uploading — polling handles it
+          }
+
+          // No compression — direct result
+          const uploadResult = result as UploadResult;
+          await api.post('/hero-media', {
+            mediaUrl: uploadResult.url,
+            mediaType: 'video',
+            label: file.name,
+            createdAt: new Date().toISOString(),
+          });
+          queryClient.invalidateQueries({ queryKey: ['hero-media'] });
+          toast('Media uploaded', 'success');
+        } else {
+          setUploadProgress(`Uploading ${file.name}...`);
+          const imageOptions: ImageUploadOptions | undefined = settings.compress
+            ? { compressQuality: settings.quality, compressMaxWidth: settings.maxWidth }
+            : undefined;
+
+          const result = await api.uploadFile(file, imageOptions);
+
+          await api.post('/hero-media', {
+            mediaUrl: result.url,
+            mediaType: 'image',
+            label: file.name,
+            createdAt: new Date().toISOString(),
+          });
+          queryClient.invalidateQueries({ queryKey: ['hero-media'] });
+
+          if (result.originalSize && result.compressedSize) {
+            const saved = result.originalSize - result.compressedSize;
+            toast(
+              `Image compressed: ${formatSize(result.originalSize)} → ${formatSize(result.compressedSize)} (saved ${formatSize(saved)})`,
+              'success'
+            );
+          } else {
+            toast('Media uploaded', 'success');
+          }
+        }
+      } catch (err) {
+        toast(err instanceof Error ? err.message : 'Upload failed', 'error');
+      } finally {
+        if (!pollRef.current) {
+          setUploading(false);
+          setUploadProgress('');
+        }
+      }
+    },
+    [queryClient, toast, pollVideoCompression]
+  );
+
+  const handleFileSelect = (file: File) => {
+    setPendingFile(file);
+  };
+
+  const handleCompressionConfirm = (settings: CompressionSettings) => {
+    if (pendingFile) {
+      handleUploadWithSettings(pendingFile, settings);
     }
+    setPendingFile(null);
+  };
+
+  const handleCompressionCancel = () => {
+    setPendingFile(null);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file) handleUpload(file);
+    if (file) handleFileSelect(file);
   };
 
   if (isLoading) {
@@ -138,7 +258,7 @@ export function HeroEditor() {
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) handleUpload(file);
+            if (file) handleFileSelect(file);
             e.target.value = '';
           }}
         />
@@ -221,6 +341,14 @@ export function HeroEditor() {
           </div>
         </div>
       )}
+
+      {/* Compression Modal */}
+      <CompressionModal
+        open={!!pendingFile}
+        file={pendingFile}
+        onConfirm={handleCompressionConfirm}
+        onCancel={handleCompressionCancel}
+      />
 
       {/* Confirm Delete Modal */}
       <ConfirmModal

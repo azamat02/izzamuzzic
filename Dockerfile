@@ -18,7 +18,7 @@ RUN cd server && npm run build
 
 # Stage 3: Production
 FROM node:22-alpine
-RUN apk add --no-cache tini
+RUN apk add --no-cache tini ffmpeg
 WORKDIR /app
 
 # Install production dependencies for server

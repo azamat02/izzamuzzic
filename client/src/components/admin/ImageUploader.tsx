@@ -1,24 +1,34 @@
 import { useState, useRef } from 'react';
 import { api } from '../../lib/api';
+import type { ImageUploadOptions } from '../../lib/api';
 import { useToast } from './Toast';
+import { CompressionModal } from './CompressionModal';
+import type { CompressionSettings } from './CompressionModal';
 import { HiOutlineUpload, HiOutlineX } from 'react-icons/hi';
 
 interface ImageUploaderProps {
   value: string;
   onChange: (url: string) => void;
   className?: string;
+  enableCompression?: boolean;
 }
 
-export function ImageUploader({ value, onChange, className = '' }: ImageUploaderProps) {
+export function ImageUploader({ value, onChange, className = '', enableCompression = false }: ImageUploaderProps) {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleUpload = async (file: File) => {
+  const doUpload = async (file: File, options?: ImageUploadOptions) => {
     setUploading(true);
     try {
-      const result = await api.uploadFile(file);
+      const result = await api.uploadFile(file, options);
       onChange(result.url);
+      if (result.originalSize && result.compressedSize) {
+        const saved = result.originalSize - result.compressedSize;
+        const pct = Math.round((saved / result.originalSize) * 100);
+        toast(`Compressed: saved ${pct}%`, 'success');
+      }
     } catch {
       toast('Upload failed', 'error');
     } finally {
@@ -26,10 +36,28 @@ export function ImageUploader({ value, onChange, className = '' }: ImageUploader
     }
   };
 
+  const handleFileSelect = (file: File) => {
+    if (enableCompression) {
+      setPendingFile(file);
+    } else {
+      doUpload(file);
+    }
+  };
+
+  const handleCompressionConfirm = (settings: CompressionSettings) => {
+    if (pendingFile) {
+      const options: ImageUploadOptions | undefined = settings.compress
+        ? { compressQuality: settings.quality, compressMaxWidth: settings.maxWidth }
+        : undefined;
+      doUpload(pendingFile, options);
+    }
+    setPendingFile(null);
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file) handleUpload(file);
+    if (file) handleFileSelect(file);
   };
 
   return (
@@ -68,9 +96,19 @@ export function ImageUploader({ value, onChange, className = '' }: ImageUploader
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
-          if (file) handleUpload(file);
+          if (file) handleFileSelect(file);
+          e.target.value = '';
         }}
       />
+
+      {enableCompression && (
+        <CompressionModal
+          open={!!pendingFile}
+          file={pendingFile}
+          onConfirm={handleCompressionConfirm}
+          onCancel={() => setPendingFile(null)}
+        />
+      )}
     </div>
   );
 }

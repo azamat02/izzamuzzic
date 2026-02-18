@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import sharp from 'sharp';
+import type { Request, Response, NextFunction } from 'express';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
@@ -47,6 +48,35 @@ export const videoUpload = multer({
   fileFilter: videoFilter,
   limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
 });
+
+export function wrapMulterMiddleware(
+  middleware: (req: Request, res: Response, cb: (err: any) => void) => void
+) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    middleware(req, res, (err: any) => {
+      if (!err) return next();
+
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          res.status(413).json({ error: 'File too large' });
+          return;
+        }
+        res.status(400).json({ error: err.message });
+        return;
+      }
+
+      if (err instanceof Error) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+
+      res.status(500).json({ error: 'Upload failed' });
+    });
+  };
+}
+
+export const handleImageUpload = wrapMulterMiddleware(upload.single('file'));
+export const handleVideoUpload = wrapMulterMiddleware(videoUpload.single('file'));
 
 export async function generateThumbnail(filename: string): Promise<string> {
   const ext = path.extname(filename);
