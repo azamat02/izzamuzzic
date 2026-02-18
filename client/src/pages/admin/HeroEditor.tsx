@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
+import { useToast } from '../../components/admin/Toast';
 import { HiOutlineUpload, HiOutlineX } from 'react-icons/hi';
 
 interface HeroData {
@@ -11,6 +12,7 @@ interface HeroData {
 export function HeroEditor() {
   const queryClient = useQueryClient();
   const [videoUrl, setVideoUrl] = useState('');
+  const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
@@ -41,7 +43,7 @@ export function HeroEditor() {
       setVideoUrl(result.url);
       setUploadProgress('');
     } catch {
-      alert('Video upload failed. Make sure the file is mp4, webm, or mov and under 100MB.');
+      toast('Video upload failed. Make sure the file is mp4, webm, or mov and under 100MB.', 'error');
     } finally {
       setUploading(false);
     }

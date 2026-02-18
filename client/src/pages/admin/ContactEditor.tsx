@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
+import { ConfirmModal } from '../../components/admin/ConfirmModal';
+import { useToast } from '../../components/admin/Toast';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck, HiOutlineX } from 'react-icons/hi';
 
 interface ContactCategory {
@@ -17,7 +19,9 @@ interface ContactSettings {
 
 export function ContactEditor() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void }>({ open: false, title: '', message: '', onConfirm: () => {} });
   const [addingNew, setAddingNew] = useState(false);
   const [editForm, setEditForm] = useState({ label: '', email: '', sortOrder: 0 });
   const [subtitle, setSubtitle] = useState('');
@@ -79,9 +83,16 @@ export function ContactEditor() {
   };
 
   const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
-      deleteMutation.mutate(id);
-    }
+    setConfirmModal({
+      open: true,
+      title: 'Delete Category',
+      message: 'Are you sure you want to delete this contact category? This action cannot be undone.',
+      onConfirm: () => {
+        deleteMutation.mutate(id);
+        setConfirmModal((prev) => ({ ...prev, open: false }));
+        toast('Category deleted');
+      },
+    });
   };
 
   const handleSave = () => {
@@ -290,6 +301,15 @@ export function ContactEditor() {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={confirmModal.open}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel="Delete"
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal((prev) => ({ ...prev, open: false }))}
+      />
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 import { ImageUploader } from '../../components/admin/ImageUploader';
+import { ConfirmModal } from '../../components/admin/ConfirmModal';
+import { useToast } from '../../components/admin/Toast';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck, HiOutlineX } from 'react-icons/hi';
 
 interface MerchImage {
@@ -44,7 +46,9 @@ const emptyForm: MerchForm = { name: '', description: '', price: 0, currency: 'U
 
 export function MerchEditor() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void }>({ open: false, title: '', message: '', onConfirm: () => {} });
   const [addingNew, setAddingNew] = useState(false);
   const [editForm, setEditForm] = useState<MerchForm>(emptyForm);
   const [managingImagesId, setManagingImagesId] = useState<number | null>(null);
@@ -132,9 +136,16 @@ export function MerchEditor() {
   };
 
   const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this merch item?')) {
-      deleteMutation.mutate(id);
-    }
+    setConfirmModal({
+      open: true,
+      title: 'Delete Merch Item',
+      message: 'Are you sure you want to delete this merch item and all its images/variants? This action cannot be undone.',
+      onConfirm: () => {
+        deleteMutation.mutate(id);
+        setConfirmModal((prev) => ({ ...prev, open: false }));
+        toast('Merch item deleted');
+      },
+    });
   };
 
   const handleSave = () => {
@@ -455,6 +466,15 @@ export function MerchEditor() {
           <p className="text-sm mt-1">Click "Add Item" to create one.</p>
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmModal.open}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel="Delete"
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal((prev) => ({ ...prev, open: false }))}
+      />
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 import { ImageUploader } from '../../components/admin/ImageUploader';
+import { ConfirmModal } from '../../components/admin/ConfirmModal';
+import { useToast } from '../../components/admin/Toast';
 import { getIcon, platformOptions } from '../../lib/iconMap';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck, HiOutlineX, HiOutlineLink } from 'react-icons/hi';
 
@@ -50,6 +52,7 @@ const emptyForm: ReleaseForm = {
 
 export function ReleasesEditor() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [editForm, setEditForm] = useState<ReleaseForm>(emptyForm);
@@ -57,6 +60,7 @@ export function ReleasesEditor() {
   const [spotifyEmbed, setSpotifyEmbed] = useState('');
   const [settingsDirty, setSettingsDirty] = useState(false);
   const [linksOpenFor, setLinksOpenFor] = useState<number | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void }>({ open: false, title: '', message: '', onConfirm: () => {} });
   const [newLinkPlatform, setNewLinkPlatform] = useState(platformOptions[0].key);
   const [newLinkUrl, setNewLinkUrl] = useState('');
   const [newLinkHoverColor, setNewLinkHoverColor] = useState('');
@@ -149,9 +153,16 @@ export function ReleasesEditor() {
   };
 
   const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this release?')) {
-      deleteMutation.mutate(id);
-    }
+    setConfirmModal({
+      open: true,
+      title: 'Delete Release',
+      message: 'Are you sure you want to delete this release and all its links? This action cannot be undone.',
+      onConfirm: () => {
+        deleteMutation.mutate(id);
+        setConfirmModal((prev) => ({ ...prev, open: false }));
+        toast('Release deleted');
+      },
+    });
   };
 
   const handleSave = () => {
@@ -473,6 +484,15 @@ export function ReleasesEditor() {
           <p className="text-sm mt-1">Click "Add Release" to create one.</p>
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmModal.open}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel="Delete"
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal((prev) => ({ ...prev, open: false }))}
+      />
     </div>
   );
 }

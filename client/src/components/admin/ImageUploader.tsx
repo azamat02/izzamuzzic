@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { api } from '../../lib/api';
+import { useToast } from './Toast';
 import { HiOutlineUpload, HiOutlineX } from 'react-icons/hi';
 
 interface ImageUploaderProps {
@@ -9,6 +10,7 @@ interface ImageUploaderProps {
 }
 
 export function ImageUploader({ value, onChange, className = '' }: ImageUploaderProps) {
+  const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -18,7 +20,7 @@ export function ImageUploader({ value, onChange, className = '' }: ImageUploader
       const result = await api.uploadFile(file);
       onChange(result.url);
     } catch {
-      alert('Upload failed');
+      toast('Upload failed', 'error');
     } finally {
       setUploading(false);
     }
