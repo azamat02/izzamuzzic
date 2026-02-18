@@ -19,7 +19,7 @@ export function Preloader({ progress }: PreloaderProps) {
       {/* Progress bar */}
       <div className="w-48 h-1 bg-[#1a1a1a] rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-[#e63946]"
+          className="h-full bg-[--color-accent]"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.3 }}

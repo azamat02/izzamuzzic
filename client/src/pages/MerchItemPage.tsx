@@ -6,6 +6,7 @@ import { Footer } from '../components/layout/Footer';
 import { usePublicData } from '../hooks/useApi';
 import { useCart } from '../lib/cart';
 import { useToast } from '../components/admin/Toast';
+import { useAccentColor } from '../lib/accentColor';
 
 interface MerchImage {
   id: number;
@@ -45,6 +46,7 @@ export function MerchItemPage() {
   const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { accent } = useAccentColor();
 
   const allImages = item
     ? [item.image, ...(item.images || []).map(img => img.url)].filter(Boolean)
@@ -75,7 +77,7 @@ export function MerchItemPage() {
 
           {isLoading && (
             <div className="flex justify-center py-20">
-              <div className="w-8 h-8 border-2 border-[#e63946] border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-[--color-accent] border-t-transparent rounded-full animate-spin" />
             </div>
           )}
 
@@ -104,7 +106,7 @@ export function MerchItemPage() {
                         key={i}
                         onClick={() => setSelectedImage(src)}
                         className={`aspect-square overflow-hidden rounded-lg bg-[#141414] border-2 transition-colors ${
-                          activeImage === src ? 'border-[#e63946]' : 'border-transparent hover:border-[#a0a0a0]'
+                          activeImage === src ? 'border-[--color-accent]' : 'border-transparent hover:border-[#a0a0a0]'
                         }`}
                       >
                         <img
@@ -125,7 +127,7 @@ export function MerchItemPage() {
                 >
                   {item.name}
                 </h1>
-                <p className="text-[#e63946] text-2xl font-medium">
+                <p className="text-[--color-accent] text-2xl font-medium">
                   ${item.price} {item.currency}
                 </p>
 
@@ -148,9 +150,14 @@ export function MerchItemPage() {
                             !variant.inStock
                               ? 'border-[#333] text-[#555] cursor-not-allowed line-through'
                               : selectedVariant === variant.id
-                                ? 'border-[#e63946] text-white bg-[#e63946]/10'
+                                ? 'border-[--color-accent] text-white'
                                 : 'border-[#555] text-white hover:border-white'
                           }`}
+                          style={
+                            variant.inStock && selectedVariant === variant.id
+                              ? { backgroundColor: `${accent}1a` }
+                              : undefined
+                          }
                         >
                           {variant.label}
                         </button>
@@ -175,7 +182,7 @@ export function MerchItemPage() {
                       toast('Товар добавлен в корзину', 'success');
                     }}
                     disabled={hasVariants && !selectedVariant}
-                    className="bg-[#e63946] text-white px-8 py-3 rounded-lg hover:bg-[#ff6b6b] transition-colors text-center font-medium tracking-wider disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="bg-[--color-accent] text-white px-8 py-3 rounded-lg hover:bg-[--color-accent-light] transition-colors text-center font-medium tracking-wider disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Добавить в корзину
                   </button>

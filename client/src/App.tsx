@@ -21,12 +21,14 @@ import { GalleryPage } from './pages/GalleryPage';
 import { AdminProtectedRoute } from './components/admin/AdminProtectedRoute';
 import { AuthProvider } from './lib/auth';
 import { CartProvider } from './lib/cart';
+import { AccentColorProvider } from './lib/accentColor';
 import { ToastProvider } from './components/admin/Toast';
 
 function App() {
   return (
     <AuthProvider>
       <CartProvider>
+      <AccentColorProvider>
       <ToastProvider>
       <Routes>
         <Route path="/" element={<PublicSite />} />
@@ -51,6 +53,7 @@ function App() {
         </Route>
       </Routes>
       </ToastProvider>
+      </AccentColorProvider>
       </CartProvider>
     </AuthProvider>
   );

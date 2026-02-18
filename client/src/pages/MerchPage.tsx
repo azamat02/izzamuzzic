@@ -46,10 +46,10 @@ export function MerchPage() {
                     />
                   </div>
                   <h3 className="text-white font-medium mb-1">{item.name}</h3>
-                  <p className="text-[#e63946] font-medium mb-3">
+                  <p className="text-[--color-accent] font-medium mb-3">
                     ${item.price} {item.currency}
                   </p>
-                  <span className="inline-block border border-white/30 text-white text-xs uppercase tracking-wider px-4 py-2 rounded-lg group-hover:border-[#e63946] group-hover:text-[#e63946] transition-colors">
+                  <span className="inline-block border border-white/30 text-white text-xs uppercase tracking-wider px-4 py-2 rounded-lg group-hover:border-[--color-accent] group-hover:text-[--color-accent] transition-colors">
                     View Details
                   </span>
                 </Link>

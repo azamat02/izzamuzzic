@@ -8,6 +8,8 @@
   --color-gray: #a0a0a0;
   --color-red: #e63946;
   --color-red-light: #ff6b6b;
+  --color-accent: #e63946;
+  --color-accent-light: #ff6b6b;
   --font-heading: 'Bebas Neue', sans-serif;
   --font-body: 'Inter', sans-serif;
 }
@@ -36,7 +38,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::selection {
-  background-color: var(--color-red);
+  background-color: var(--color-accent);
   color: white;
 }
 
@@ -49,10 +51,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-red);
+  background: var(--color-accent);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-red-light);
+  background: var(--color-accent-light);
 }

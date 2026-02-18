@@ -39,7 +39,7 @@ export function CheckoutPage() {
         <main className="min-h-screen bg-[#0a0a0a] pt-32 pb-24">
           <div className="max-w-2xl mx-auto px-4 text-center py-20">
             <p className="text-[#a0a0a0] text-lg mb-6">Корзина пуста</p>
-            <Link to="/merch" className="inline-block bg-[#e63946] text-white px-8 py-3 rounded-lg hover:bg-[#ff6b6b] transition-colors font-medium">
+            <Link to="/merch" className="inline-block bg-[--color-accent] text-white px-8 py-3 rounded-lg hover:bg-[--color-accent-light] transition-colors font-medium">
               Перейти в магазин
             </Link>
           </div>
@@ -125,11 +125,11 @@ export function CheckoutPage() {
             {[1, 2, 3, 4].map(s => (
               <div key={s} className="flex items-center gap-2">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  s <= step ? 'bg-[#e63946] text-white' : 'bg-[#1a1a1a] text-[#555]'
+                  s <= step ? 'bg-[--color-accent] text-white' : 'bg-[#1a1a1a] text-[#555]'
                 }`}>
                   {s}
                 </div>
-                {s < 4 && <div className={`w-8 h-0.5 ${s < step ? 'bg-[#e63946]' : 'bg-[#1a1a1a]'}`} />}
+                {s < 4 && <div className={`w-8 h-0.5 ${s < step ? 'bg-[--color-accent]' : 'bg-[#1a1a1a]'}`} />}
               </div>
             ))}
           </div>
@@ -144,7 +144,7 @@ export function CheckoutPage() {
                   type="text"
                   value={customerName}
                   onChange={e => setCustomerName(e.target.value)}
-                  className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:border-[#e63946] focus:outline-none"
+                  className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:border-[--color-accent] focus:outline-none"
                   placeholder="Иванов Иван Иванович"
                 />
               </div>
@@ -154,7 +154,7 @@ export function CheckoutPage() {
                   type="tel"
                   value={customerPhone}
                   onChange={e => setCustomerPhone(e.target.value)}
-                  className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:border-[#e63946] focus:outline-none"
+                  className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:border-[--color-accent] focus:outline-none"
                   placeholder="+7 (777) 123-45-67"
                 />
               </div>
@@ -164,7 +164,7 @@ export function CheckoutPage() {
                   type="email"
                   value={customerEmail}
                   onChange={e => setCustomerEmail(e.target.value)}
-                  className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:border-[#e63946] focus:outline-none"
+                  className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:border-[--color-accent] focus:outline-none"
                   placeholder="email@example.com"
                 />
               </div>
@@ -174,14 +174,14 @@ export function CheckoutPage() {
                   value={customerAddress}
                   onChange={e => setCustomerAddress(e.target.value)}
                   rows={3}
-                  className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:border-[#e63946] focus:outline-none resize-none"
+                  className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:border-[--color-accent] focus:outline-none resize-none"
                   placeholder="Город, улица, дом, квартира"
                 />
               </div>
               <button
                 onClick={() => setStep(2)}
                 disabled={!step1Valid}
-                className="w-full bg-[#e63946] text-white px-8 py-3 rounded-lg hover:bg-[#ff6b6b] transition-colors font-medium tracking-wider disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full bg-[--color-accent] text-white px-8 py-3 rounded-lg hover:bg-[--color-accent-light] transition-colors font-medium tracking-wider disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Далее
               </button>
@@ -205,7 +205,7 @@ export function CheckoutPage() {
                 ))}
                 <div className="border-t border-[#1a1a1a] pt-3 flex justify-between">
                   <span className="text-white font-medium">Итого:</span>
-                  <span className="text-[#e63946] font-bold text-lg">{totalAmount.toLocaleString()} KZT</span>
+                  <span className="text-[--color-accent] font-bold text-lg">{totalAmount.toLocaleString()} KZT</span>
                 </div>
               </div>
 
@@ -218,7 +218,7 @@ export function CheckoutPage() {
                     href={kaspiPayUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block bg-[#f14635] text-white px-8 py-3 rounded-lg hover:bg-[#ff6b6b] transition-colors font-medium"
+                    className="inline-block bg-[#f14635] text-white px-8 py-3 rounded-lg hover:bg-[--color-accent-light] transition-colors font-medium"
                   >
                     Оплатить через Kaspi
                   </a>
@@ -231,7 +231,7 @@ export function CheckoutPage() {
                 <button onClick={() => setStep(1)} className="flex-1 border border-[#333] text-white px-8 py-3 rounded-lg hover:border-white transition-colors font-medium">
                   Назад
                 </button>
-                <button onClick={() => setStep(3)} className="flex-1 bg-[#e63946] text-white px-8 py-3 rounded-lg hover:bg-[#ff6b6b] transition-colors font-medium">
+                <button onClick={() => setStep(3)} className="flex-1 bg-[--color-accent] text-white px-8 py-3 rounded-lg hover:bg-[--color-accent-light] transition-colors font-medium">
                   Далее — загрузить чек
                 </button>
               </div>
@@ -246,7 +246,7 @@ export function CheckoutPage() {
               <div
                 onDragOver={e => e.preventDefault()}
                 onDrop={handleDrop}
-                className="border-2 border-dashed border-[#333] rounded-lg p-10 text-center hover:border-[#e63946] transition-colors"
+                className="border-2 border-dashed border-[#333] rounded-lg p-10 text-center hover:border-[--color-accent] transition-colors"
               >
                 {receiptPreview ? (
                   <div className="space-y-4">
@@ -315,7 +315,7 @@ export function CheckoutPage() {
                 <button
                   onClick={handleSubmitOrder}
                   disabled={!receiptUrl || uploading || receiptValid === false || submitting}
-                  className="flex-1 bg-[#e63946] text-white px-8 py-3 rounded-lg hover:bg-[#ff6b6b] transition-colors font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex-1 bg-[--color-accent] text-white px-8 py-3 rounded-lg hover:bg-[--color-accent-light] transition-colors font-medium disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {submitting ? 'Отправка...' : 'Отправить заказ'}
                 </button>
@@ -342,7 +342,7 @@ export function CheckoutPage() {
               <div className="flex gap-3 justify-center">
                 <Link
                   to="/merch"
-                  className="inline-block bg-[#e63946] text-white px-8 py-3 rounded-lg hover:bg-[#ff6b6b] transition-colors font-medium"
+                  className="inline-block bg-[--color-accent] text-white px-8 py-3 rounded-lg hover:bg-[--color-accent-light] transition-colors font-medium"
                 >
                   Вернуться в магазин
                 </Link>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
+import { DEFAULT_ACCENT, lightenColor } from '../../lib/color';
 
 export function SiteSettingsEditor() {
   const queryClient = useQueryClient();
@@ -61,7 +62,21 @@ export function SiteSettingsEditor() {
     );
   }
 
-  const keys = Object.keys(form);
+  const accentColor = form.accentColor || DEFAULT_ACCENT;
+  const accentLight = lightenColor(accentColor);
+  const keys = Object.keys(form).filter(k => k !== 'accentColor');
+
+  const handleAccentChange = (color: string) => {
+    setForm((prev) => ({ ...prev, accentColor: color }));
+  };
+
+  const handleAccentReset = () => {
+    setForm((prev) => {
+      const updated = { ...prev };
+      delete updated.accentColor;
+      return updated;
+    });
+  };
 
   return (
     <div>
@@ -69,6 +84,42 @@ export function SiteSettingsEditor() {
         <h1 className="text-3xl text-white" style={{ fontFamily: 'var(--font-heading)' }}>
           SITE SETTINGS
         </h1>
+      </div>
+
+      {/* Accent Color */}
+      <div className="bg-[#141414] border border-[#1a1a1a] rounded-lg p-5 mb-8">
+        <h2 className="text-white text-sm font-medium mb-4">Accent Color</h2>
+        <div className="flex items-center gap-4 flex-wrap">
+          <input
+            type="color"
+            value={accentColor}
+            onChange={(e) => handleAccentChange(e.target.value)}
+            className="w-10 h-10 rounded-lg border border-[#1a1a1a] cursor-pointer bg-transparent"
+          />
+          <input
+            type="text"
+            value={accentColor}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (/^#[0-9a-fA-F]{0,6}$/.test(v)) handleAccentChange(v);
+            }}
+            maxLength={7}
+            className="w-28 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-[#e63946] transition-colors"
+          />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded" style={{ backgroundColor: accentColor }} title="Primary" />
+            <div className="w-8 h-8 rounded" style={{ backgroundColor: accentLight }} title="Hover" />
+            <span className="text-[#a0a0a0] text-xs ml-1">Primary / Hover</span>
+          </div>
+          {form.accentColor && (
+            <button
+              onClick={handleAccentReset}
+              className="text-[#a0a0a0] hover:text-white text-sm transition-colors"
+            >
+              Reset to default
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Existing settings */}
@@ -124,24 +175,22 @@ export function SiteSettingsEditor() {
         ))}
       </div>
 
-      {/* Save existing changes */}
-      {keys.length > 0 && (
-        <div className="mb-8">
-          <button
-            onClick={handleSave}
-            disabled={saveMutation.isPending}
-            className="px-6 py-2.5 text-sm text-white bg-[#e63946] hover:bg-[#ff6b6b] rounded-lg transition-colors disabled:opacity-50"
-          >
-            {saveMutation.isPending ? 'Saving...' : 'Save All Settings'}
-          </button>
-          {saveMutation.isSuccess && (
-            <span className="ml-3 text-green-400 text-sm">Saved successfully</span>
-          )}
-          {saveMutation.isError && (
-            <span className="ml-3 text-red-400 text-sm">Failed to save</span>
-          )}
-        </div>
-      )}
+      {/* Save all changes */}
+      <div className="mb-8">
+        <button
+          onClick={handleSave}
+          disabled={saveMutation.isPending}
+          className="px-6 py-2.5 text-sm text-white bg-[#e63946] hover:bg-[#ff6b6b] rounded-lg transition-colors disabled:opacity-50"
+        >
+          {saveMutation.isPending ? 'Saving...' : 'Save All Settings'}
+        </button>
+        {saveMutation.isSuccess && (
+          <span className="ml-3 text-green-400 text-sm">Saved successfully</span>
+        )}
+        {saveMutation.isError && (
+          <span className="ml-3 text-red-400 text-sm">Failed to save</span>
+        )}
+      </div>
 
       {/* Add new setting */}
       <div className="bg-[#141414] border border-[#1a1a1a] rounded-lg p-5">

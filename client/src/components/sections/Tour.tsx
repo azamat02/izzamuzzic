@@ -48,7 +48,7 @@ export function Tour() {
               >
                 <div className="flex items-center gap-6">
                   <div className="text-center min-w-[80px]">
-                    <p className="text-4xl text-[#e63946]" style={{ fontFamily: 'var(--font-heading)' }}>{date.day}</p>
+                    <p className="text-4xl text-[--color-accent]" style={{ fontFamily: 'var(--font-heading)' }}>{date.day}</p>
                     <p className="text-[#a0a0a0] text-sm">{date.month} {date.year}</p>
                   </div>
                   <div>
