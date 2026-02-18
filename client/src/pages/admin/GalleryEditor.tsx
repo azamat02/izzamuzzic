@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 import { ImageUploader } from '../../components/admin/ImageUploader';
-import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck, HiOutlineX } from 'react-icons/hi';
+import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck, HiOutlineX, HiOutlinePhotograph } from 'react-icons/hi';
 
 interface GalleryImage {
   id: number;
@@ -16,6 +16,9 @@ export function GalleryEditor() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [editForm, setEditForm] = useState({ src: '', alt: '', sortOrder: 0 });
+  const [batchUploading, setBatchUploading] = useState(false);
+  const [batchProgress, setBatchProgress] = useState({ done: 0, total: 0 });
+  const batchInputRef = useRef<HTMLInputElement>(null);
 
   const { data: images = [], isLoading } = useQuery({
     queryKey: ['gallery'],
@@ -69,6 +72,31 @@ export function GalleryEditor() {
     createMutation.mutate(editForm);
   };
 
+  const handleBatchUpload = async (files: FileList) => {
+    const total = files.length;
+    setBatchUploading(true);
+    setBatchProgress({ done: 0, total });
+
+    const currentMax = images.reduce((max, img) => Math.max(max, img.sortOrder), 0);
+
+    const uploads = Array.from(files).map(async (file, i) => {
+      try {
+        const result = await api.uploadFile(file);
+        await api.post('/gallery', {
+          src: result.url,
+          alt: file.name,
+          sortOrder: currentMax + i + 1,
+        });
+      } finally {
+        setBatchProgress((prev) => ({ ...prev, done: prev.done + 1 }));
+      }
+    });
+
+    await Promise.allSettled(uploads);
+    await queryClient.invalidateQueries({ queryKey: ['gallery'] });
+    setBatchUploading(false);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -81,17 +109,56 @@ export function GalleryEditor() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl text-white" style={{ fontFamily: 'var(--font-heading)' }}>GALLERY</h1>
-        <button
-          onClick={() => {
-            setAddingNew(true);
-            setEditForm({ src: '', alt: '', sortOrder: images.length });
-          }}
-          className="flex items-center gap-2 bg-[#e63946] text-white px-4 py-2 rounded-lg hover:bg-[#ff6b6b] transition-colors text-sm"
-        >
-          <HiOutlinePlus className="text-lg" />
-          Add Image
-        </button>
+        <div className="flex items-center gap-2">
+          <input
+            ref={batchInputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                handleBatchUpload(e.target.files);
+              }
+              e.target.value = '';
+            }}
+          />
+          <button
+            onClick={() => batchInputRef.current?.click()}
+            disabled={batchUploading}
+            className="flex items-center gap-2 bg-[#1a1a1a] text-white px-4 py-2 rounded-lg hover:bg-[#2a2a2a] transition-colors text-sm border border-[#e63946]/30 disabled:opacity-50"
+          >
+            <HiOutlinePhotograph className="text-lg" />
+            Batch Upload
+          </button>
+          <button
+            onClick={() => {
+              setAddingNew(true);
+              setEditForm({ src: '', alt: '', sortOrder: images.length });
+            }}
+            className="flex items-center gap-2 bg-[#e63946] text-white px-4 py-2 rounded-lg hover:bg-[#ff6b6b] transition-colors text-sm"
+          >
+            <HiOutlinePlus className="text-lg" />
+            Add Image
+          </button>
+        </div>
       </div>
+
+      {/* Batch Upload Progress */}
+      {batchUploading && (
+        <div className="bg-[#141414] border border-[#e63946]/30 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-white text-sm">Uploading {batchProgress.done}/{batchProgress.total}...</span>
+            <span className="text-[#a0a0a0] text-xs">{Math.round((batchProgress.done / batchProgress.total) * 100)}%</span>
+          </div>
+          <div className="w-full h-2 bg-[#0a0a0a] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#e63946] rounded-full transition-all duration-300"
+              style={{ width: `${(batchProgress.done / batchProgress.total) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Add New Form */}
       {addingNew && (
