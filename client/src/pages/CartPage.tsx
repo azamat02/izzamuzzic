@@ -25,7 +25,7 @@ export function CartPage() {
               <p className="text-[#a0a0a0] text-lg mb-6">Корзина пуста</p>
               <Link
                 to="/merch"
-                className="inline-block bg-[--color-accent] text-white px-8 py-3 rounded-lg hover:bg-[--color-accent-light] transition-colors font-medium tracking-wider"
+                className="inline-block bg-[var(--color-accent)] text-white px-8 py-3 rounded-lg hover:bg-[var(--color-accent-light)] transition-colors font-medium tracking-wider"
               >
                 Перейти в магазин
               </Link>
@@ -52,7 +52,7 @@ export function CartPage() {
                       {item.variantLabel && (
                         <p className="text-[#a0a0a0] text-sm">Размер: {item.variantLabel}</p>
                       )}
-                      <p className="text-[--color-accent] font-medium mt-1">
+                      <p className="text-[var(--color-accent)] font-medium mt-1">
                         {item.price.toLocaleString()} KZT
                       </p>
                     </div>
@@ -80,7 +80,7 @@ export function CartPage() {
 
                     <button
                       onClick={() => removeItem(item.merchItemId, item.variantId)}
-                      className="text-[#a0a0a0] hover:text-[--color-accent] transition-colors p-2"
+                      className="text-[#a0a0a0] hover:text-[var(--color-accent)] transition-colors p-2"
                     >
                       <HiOutlineTrash className="text-lg" />
                     </button>
@@ -97,7 +97,7 @@ export function CartPage() {
                 </div>
                 <Link
                   to="/checkout"
-                  className="block w-full bg-[--color-accent] text-white text-center px-8 py-3 rounded-lg hover:bg-[--color-accent-light] transition-colors font-medium tracking-wider"
+                  className="block w-full bg-[var(--color-accent)] text-white text-center px-8 py-3 rounded-lg hover:bg-[var(--color-accent-light)] transition-colors font-medium tracking-wider"
                 >
                   Оформить заказ
                 </Link>

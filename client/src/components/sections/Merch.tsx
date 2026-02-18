@@ -44,7 +44,7 @@ export function Merch() {
                   />
                 </div>
                 <h3 className="text-white font-medium mb-1">{item.name}</h3>
-                <p className="text-[--color-accent] font-medium mb-3">
+                <p className="text-[var(--color-accent)] font-medium mb-3">
                   ${item.price} {item.currency}
                 </p>
               </Link>

@@ -77,7 +77,7 @@ export function MerchItemPage() {
 
           {isLoading && (
             <div className="flex justify-center py-20">
-              <div className="w-8 h-8 border-2 border-[--color-accent] border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
             </div>
           )}
 
@@ -106,7 +106,7 @@ export function MerchItemPage() {
                         key={i}
                         onClick={() => setSelectedImage(src)}
                         className={`aspect-square overflow-hidden rounded-lg bg-[#141414] border-2 transition-colors ${
-                          activeImage === src ? 'border-[--color-accent]' : 'border-transparent hover:border-[#a0a0a0]'
+                          activeImage === src ? 'border-[var(--color-accent)]' : 'border-transparent hover:border-[#a0a0a0]'
                         }`}
                       >
                         <img
@@ -127,7 +127,7 @@ export function MerchItemPage() {
                 >
                   {item.name}
                 </h1>
-                <p className="text-[--color-accent] text-2xl font-medium">
+                <p className="text-[var(--color-accent)] text-2xl font-medium">
                   ${item.price} {item.currency}
                 </p>
 
@@ -150,7 +150,7 @@ export function MerchItemPage() {
                             !variant.inStock
                               ? 'border-[#333] text-[#555] cursor-not-allowed line-through'
                               : selectedVariant === variant.id
-                                ? 'border-[--color-accent] text-white'
+                                ? 'border-[var(--color-accent)] text-white'
                                 : 'border-[#555] text-white hover:border-white'
                           }`}
                           style={
@@ -182,7 +182,7 @@ export function MerchItemPage() {
                       toast('Товар добавлен в корзину', 'success');
                     }}
                     disabled={hasVariants && !selectedVariant}
-                    className="bg-[--color-accent] text-white px-8 py-3 rounded-lg hover:bg-[--color-accent-light] transition-colors text-center font-medium tracking-wider disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="bg-[var(--color-accent)] text-white px-8 py-3 rounded-lg hover:bg-[var(--color-accent-light)] transition-colors text-center font-medium tracking-wider disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Добавить в корзину
                   </button>

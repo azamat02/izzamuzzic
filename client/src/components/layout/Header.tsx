@@ -57,7 +57,7 @@ export function Header() {
               <a
                 key={item.id}
                 href={getNavHref(item.href)}
-                className="text-sm font-medium text-white hover:text-[--color-accent] transition-colors duration-300 uppercase tracking-wider"
+                className="text-sm font-medium text-white hover:text-[var(--color-accent)] transition-colors duration-300 uppercase tracking-wider"
               >
                 {item.label}
               </a>
@@ -66,10 +66,10 @@ export function Header() {
 
           <div className="hidden lg:flex items-center gap-4">
             <SocialLinks size="sm" />
-            <Link to="/cart" className="relative text-white hover:text-[--color-accent] transition-colors">
+            <Link to="/cart" className="relative text-white hover:text-[var(--color-accent)] transition-colors">
               <HiOutlineShoppingCart className="text-xl" />
               {itemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[--color-accent] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-[var(--color-accent)] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                   {itemCount}
                 </span>
               )}
@@ -105,7 +105,7 @@ export function Header() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-lg font-medium text-white hover:text-[--color-accent] transition-colors uppercase tracking-wider"
+                  className="text-lg font-medium text-white hover:text-[var(--color-accent)] transition-colors uppercase tracking-wider"
                 >
                   {item.label}
                 </motion.a>
@@ -113,12 +113,12 @@ export function Header() {
               <Link
                 to="/cart"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="relative text-lg font-medium text-white hover:text-[--color-accent] transition-colors uppercase tracking-wider flex items-center gap-2"
+                className="relative text-lg font-medium text-white hover:text-[var(--color-accent)] transition-colors uppercase tracking-wider flex items-center gap-2"
               >
                 <HiOutlineShoppingCart className="text-xl" />
                 Cart
                 {itemCount > 0 && (
-                  <span className="bg-[--color-accent] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="bg-[var(--color-accent)] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                     {itemCount}
                   </span>
                 )}

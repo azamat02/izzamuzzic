@@ -38,12 +38,12 @@ export function Contact() {
             {(categories || []).map((cat) => (
               <div key={cat.id}>
                 <h3 className="text-white text-xl font-medium mb-4 flex items-center gap-2">
-                  <FaEnvelope className="text-[--color-accent]" />
+                  <FaEnvelope className="text-[var(--color-accent)]" />
                   {cat.label}
                 </h3>
                 <a
                   href={`mailto:${cat.email}`}
-                  className="text-[#a0a0a0] hover:text-[--color-accent] transition-colors text-lg"
+                  className="text-[#a0a0a0] hover:text-[var(--color-accent)] transition-colors text-lg"
                 >
                   {cat.email}
                 </a>
@@ -60,17 +60,17 @@ export function Contact() {
             <form className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-[#a0a0a0] text-sm mb-2">Name</label>
-                <input type="text" id="name" name="name" className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[--color-accent] transition-colors" placeholder="Your name" />
+                <input type="text" id="name" name="name" className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--color-accent)] transition-colors" placeholder="Your name" />
               </div>
               <div>
                 <label htmlFor="email" className="block text-[#a0a0a0] text-sm mb-2">Email</label>
-                <input type="email" id="email" name="email" className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[--color-accent] transition-colors" placeholder="your@email.com" />
+                <input type="email" id="email" name="email" className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--color-accent)] transition-colors" placeholder="your@email.com" />
               </div>
               <div>
                 <label htmlFor="message" className="block text-[#a0a0a0] text-sm mb-2">Message</label>
-                <textarea id="message" name="message" rows={5} className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[--color-accent] transition-colors resize-none" placeholder="Your message..." />
+                <textarea id="message" name="message" rows={5} className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--color-accent)] transition-colors resize-none" placeholder="Your message..." />
               </div>
-              <button type="submit" className="w-full bg-[--color-accent] text-white py-3 rounded-lg font-medium hover:bg-[--color-accent-light] transition-colors duration-300">
+              <button type="submit" className="w-full bg-[var(--color-accent)] text-white py-3 rounded-lg font-medium hover:bg-[var(--color-accent-light)] transition-colors duration-300">
                 Send Message
               </button>
             </form>

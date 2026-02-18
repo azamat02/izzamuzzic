@@ -60,7 +60,7 @@ export function Gallery() {
           <div className="text-center mt-8">
             <Link
               to="/gallery"
-              className="inline-block border border-white/30 text-white text-sm uppercase tracking-wider px-8 py-3 rounded-lg hover:border-[--color-accent] hover:text-[--color-accent] transition-colors"
+              className="inline-block border border-white/30 text-white text-sm uppercase tracking-wider px-8 py-3 rounded-lg hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
             >
               View All
             </Link>

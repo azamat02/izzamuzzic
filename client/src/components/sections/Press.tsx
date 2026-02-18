@@ -33,7 +33,7 @@ export function Press() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="bg-[#0a0a0a] p-8 rounded-lg relative"
             >
-              <FaQuoteLeft className="text-[--color-accent] text-3xl mb-4 opacity-50" />
+              <FaQuoteLeft className="text-[var(--color-accent)] text-3xl mb-4 opacity-50" />
               <p className="text-[#a0a0a0] text-lg italic mb-6 leading-relaxed">{item.quote}</p>
               <p className="text-white font-medium">— {item.source}</p>
             </motion.div>

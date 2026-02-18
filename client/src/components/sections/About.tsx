@@ -43,7 +43,7 @@ export function About() {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="absolute -bottom-4 -right-4 w-32 h-32 border-2 border-[--color-accent] rounded-lg -z-10" />
+            <div className="absolute -bottom-4 -right-4 w-32 h-32 border-2 border-[var(--color-accent)] rounded-lg -z-10" />
           </motion.div>
 
           <motion.div
@@ -66,19 +66,19 @@ export function About() {
             <div className="grid grid-cols-3 gap-6 pt-8">
               {about?.stat1Value && (
                 <div className="text-center">
-                  <p className="text-4xl text-[--color-accent]" style={{ fontFamily: 'var(--font-heading)' }}>{about.stat1Value}</p>
+                  <p className="text-4xl text-[var(--color-accent)]" style={{ fontFamily: 'var(--font-heading)' }}>{about.stat1Value}</p>
                   <p className="text-[#a0a0a0] text-sm uppercase">{about.stat1Label}</p>
                 </div>
               )}
               {about?.stat2Value && (
                 <div className="text-center">
-                  <p className="text-4xl text-[--color-accent]" style={{ fontFamily: 'var(--font-heading)' }}>{about.stat2Value}</p>
+                  <p className="text-4xl text-[var(--color-accent)]" style={{ fontFamily: 'var(--font-heading)' }}>{about.stat2Value}</p>
                   <p className="text-[#a0a0a0] text-sm uppercase">{about.stat2Label}</p>
                 </div>
               )}
               {about?.stat3Value && (
                 <div className="text-center">
-                  <p className="text-4xl text-[--color-accent]" style={{ fontFamily: 'var(--font-heading)' }}>{about.stat3Value}</p>
+                  <p className="text-4xl text-[var(--color-accent)]" style={{ fontFamily: 'var(--font-heading)' }}>{about.stat3Value}</p>
                   <p className="text-[#a0a0a0] text-sm uppercase">{about.stat3Label}</p>
                 </div>
               )}
