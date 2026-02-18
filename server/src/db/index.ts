@@ -44,5 +44,12 @@ try {
   // Column already exists
 }
 
+// Add play_url column to releases if missing
+try {
+  sqlite.exec(`ALTER TABLE releases ADD COLUMN play_url TEXT`);
+} catch {
+  // Column already exists
+}
+
 export const db = drizzle(sqlite, { schema });
 export { schema };

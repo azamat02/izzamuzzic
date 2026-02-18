@@ -30,6 +30,7 @@ export const releases = sqliteTable('releases', {
   spotifyUrl: text('spotify_url'),
   youtubeUrl: text('youtube_url'),
   sortOrder: integer('sort_order').notNull().default(0),
+  playUrl: text('play_url'),
 });
 
 export const releaseLinks = sqliteTable('release_links', {

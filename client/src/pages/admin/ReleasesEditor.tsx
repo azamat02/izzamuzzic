@@ -23,6 +23,7 @@ interface Release {
   year: number;
   cover: string;
   sortOrder: number;
+  playUrl: string | null;
   links: ReleaseLink[];
 }
 
@@ -38,6 +39,7 @@ interface ReleaseForm {
   year: number;
   cover: string;
   sortOrder: number;
+  playUrl: string;
 }
 
 const releaseTypes = ['single', 'ep', 'album'];
@@ -48,6 +50,7 @@ const emptyForm: ReleaseForm = {
   year: new Date().getFullYear(),
   cover: '',
   sortOrder: 0,
+  playUrl: '',
 };
 
 export function ReleasesEditor() {
@@ -149,6 +152,7 @@ export function ReleasesEditor() {
       year: release.year,
       cover: release.cover,
       sortOrder: release.sortOrder,
+      playUrl: release.playUrl || '',
     });
   };
 
@@ -245,6 +249,16 @@ export function ReleasesEditor() {
               value={editForm.sortOrder}
               onChange={(e) => setEditForm({ ...editForm, sortOrder: parseInt(e.target.value) || 0 })}
               className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#e63946] transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-[#a0a0a0] text-sm mb-2">Play URL</label>
+            <input
+              type="url"
+              value={editForm.playUrl}
+              onChange={(e) => setEditForm({ ...editForm, playUrl: e.target.value })}
+              className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#e63946] transition-colors"
+              placeholder="https://youtube.com/watch?v=... or Spotify link"
             />
           </div>
         </div>

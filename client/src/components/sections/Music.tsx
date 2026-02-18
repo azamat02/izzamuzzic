@@ -30,6 +30,7 @@ interface Release {
   year: number;
   cover: string;
   sortOrder: number;
+  playUrl: string | null;
   links: ReleaseLink[];
 }
 
@@ -65,8 +66,22 @@ export function Music() {
                 <img
                   src={release.cover}
                   alt={release.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className={`w-full h-full object-cover transition-transform duration-500 ${release.playUrl ? 'group-hover:scale-105' : 'group-hover:scale-110'}`}
                 />
+                {release.playUrl && (
+                  <a
+                    href={release.playUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/50 transition-all duration-300"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300">
+                      <svg viewBox="0 0 24 24" className="w-7 h-7 ml-1 text-black" fill="currentColor">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </a>
+                )}
               </div>
               <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 flex gap-3">
                 {(release.links || []).map((link) => {
