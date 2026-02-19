@@ -40,7 +40,7 @@ const videoFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilter
 export const upload = multer({
   storage,
   fileFilter: imageFilter,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: {}
 });
 
 export const videoUpload = multer({
