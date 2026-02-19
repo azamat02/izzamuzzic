@@ -61,5 +61,15 @@ sqlite.exec(`
   );
 `);
 
+// Create favicon_media table
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS favicon_media (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    media_url TEXT NOT NULL,
+    label TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL
+  );
+`);
+
 export const db = drizzle(sqlite, { schema });
 export { schema };
