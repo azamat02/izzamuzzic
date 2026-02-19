@@ -14,6 +14,7 @@ import { SocialsEditor } from './pages/admin/SocialsEditor';
 import { NavigationEditor } from './pages/admin/NavigationEditor';
 import { SiteSettingsEditor } from './pages/admin/SiteSettingsEditor';
 import { HeroEditor } from './pages/admin/HeroEditor';
+import { LogoEditor } from './pages/admin/LogoEditor';
 import { OrdersEditor } from './pages/admin/OrdersEditor';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
@@ -41,6 +42,7 @@ function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
+          <Route path="logo" element={<LogoEditor />} />
           <Route path="hero" element={<HeroEditor />} />
           <Route path="about" element={<AboutEditor />} />
           <Route path="releases" element={<ReleasesEditor />} />

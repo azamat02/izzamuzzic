@@ -19,11 +19,13 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data: navItems } = usePublicData<NavigationItem[]>('navigation', '/navigation');
+  const { data: activeLogoData } = usePublicData<{ url: string | null }>('active-logo', '/active-logo');
   const { isSectionVisible } = useNavigationVisibility();
 
   const { itemCount } = useCart();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const logoSrc = activeLogoData?.url || '/logo_white.png';
   const visibleItems = (navItems || []).filter(item => item.visible);
   const isMerchVisible = isSectionVisible('#merch');
 
@@ -52,7 +54,7 @@ export function Header() {
       <div className="w-full px-6 sm:px-10 lg:px-16">
         <div className="relative flex items-center justify-between h-20 w-full">
           <Link to="/" className="hover:opacity-80 transition-opacity">
-            <img src="/logo_white.png" alt="IZZAMUZZIC" className="h-16" />
+            <img src={logoSrc} alt="IZZAMUZZIC" className="h-16" />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">

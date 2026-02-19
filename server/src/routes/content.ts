@@ -428,6 +428,56 @@ router.delete('/hero-media/:id', authMiddleware, (req, res) => {
   res.json({ success: true });
 });
 
+// ============ LOGO MEDIA ============
+router.get('/logo-media', (_req, res) => {
+  const data = db.select().from(schema.logoMedia).orderBy(desc(schema.logoMedia.id)).all();
+  res.json(data);
+});
+
+router.get('/active-logo', (_req, res) => {
+  const setting = db.select().from(schema.siteSettings).where(eq(schema.siteSettings.key, 'activeLogoId')).get();
+  if (setting && setting.value) {
+    const logoId = parseInt(setting.value);
+    const logo = db.select().from(schema.logoMedia).where(eq(schema.logoMedia.id, logoId)).get();
+    if (logo) {
+      res.json({ url: logo.mediaUrl });
+      return;
+    }
+  }
+  res.json({ url: null });
+});
+
+router.post('/logo-media', authMiddleware, (req, res) => {
+  const result = db.insert(schema.logoMedia).values(req.body).returning().get();
+  res.status(201).json(result);
+});
+
+router.put('/logo-media/:id/activate', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id as string);
+  const media = db.select().from(schema.logoMedia).where(eq(schema.logoMedia.id, id)).get();
+  if (!media) {
+    res.status(404).json({ error: 'Logo not found' });
+    return;
+  }
+  const existing = db.select().from(schema.siteSettings).where(eq(schema.siteSettings.key, 'activeLogoId')).get();
+  if (existing) {
+    db.update(schema.siteSettings).set({ value: String(id) }).where(eq(schema.siteSettings.id, existing.id)).run();
+  } else {
+    db.insert(schema.siteSettings).values({ key: 'activeLogoId', value: String(id) }).run();
+  }
+  res.json({ success: true });
+});
+
+router.delete('/logo-media/:id', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id as string);
+  const setting = db.select().from(schema.siteSettings).where(eq(schema.siteSettings.key, 'activeLogoId')).get();
+  if (setting && setting.value === String(id)) {
+    db.update(schema.siteSettings).set({ value: '' }).where(eq(schema.siteSettings.id, setting.id)).run();
+  }
+  db.delete(schema.logoMedia).where(eq(schema.logoMedia.id, id)).run();
+  res.json({ success: true });
+});
+
 // ============ SITE SETTINGS ============
 router.get('/settings', (_req, res) => {
   const data = db.select().from(schema.siteSettings).all();

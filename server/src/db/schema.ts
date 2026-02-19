@@ -140,6 +140,13 @@ export const heroMedia = sqliteTable('hero_media', {
   createdAt: text('created_at').notNull(),
 });
 
+export const logoMedia = sqliteTable('logo_media', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  mediaUrl: text('media_url').notNull(),
+  label: text('label').notNull().default(''),
+  createdAt: text('created_at').notNull(),
+});
+
 export const siteSettings = sqliteTable('site_settings', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   key: text('key').notNull().unique(),
