@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
 });
 
 const imageFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/x-icon', 'image/vnd.microsoft.icon', 'image/svg+xml'];
   if (allowed.includes(file.mimetype)) {
     cb(null, true);
   } else {
