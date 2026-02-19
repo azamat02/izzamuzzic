@@ -15,6 +15,7 @@ import { NavigationEditor } from './pages/admin/NavigationEditor';
 import { SiteSettingsEditor } from './pages/admin/SiteSettingsEditor';
 import { HeroEditor } from './pages/admin/HeroEditor';
 import { LogoEditor } from './pages/admin/LogoEditor';
+import { FaviconEditor } from './pages/admin/FaviconEditor';
 import { OrdersEditor } from './pages/admin/OrdersEditor';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
@@ -25,8 +26,29 @@ import { AuthProvider } from './lib/auth';
 import { CartProvider } from './lib/cart';
 import { AccentColorProvider } from './lib/accentColor';
 import { ToastProvider } from './components/admin/Toast';
+import { useEffect } from 'react';
+
+function useFavicon() {
+  useEffect(() => {
+    fetch('/api/active-favicon')
+      .then(r => r.json())
+      .then((data: { url: string | null }) => {
+        if (data.url) {
+          let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+          }
+          link.href = data.url;
+        }
+      })
+      .catch(() => {});
+  }, []);
+}
 
 function App() {
+  useFavicon();
   return (
     <AuthProvider>
       <CartProvider>
@@ -43,6 +65,7 @@ function App() {
         <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
           <Route path="logo" element={<LogoEditor />} />
+          <Route path="favicon" element={<FaviconEditor />} />
           <Route path="hero" element={<HeroEditor />} />
           <Route path="about" element={<AboutEditor />} />
           <Route path="releases" element={<ReleasesEditor />} />

@@ -478,6 +478,56 @@ router.delete('/logo-media/:id', authMiddleware, (req, res) => {
   res.json({ success: true });
 });
 
+// ============ FAVICON MEDIA ============
+router.get('/favicon-media', (_req, res) => {
+  const data = db.select().from(schema.faviconMedia).orderBy(desc(schema.faviconMedia.id)).all();
+  res.json(data);
+});
+
+router.get('/active-favicon', (_req, res) => {
+  const setting = db.select().from(schema.siteSettings).where(eq(schema.siteSettings.key, 'activeFaviconId')).get();
+  if (setting && setting.value) {
+    const faviconId = parseInt(setting.value);
+    const favicon = db.select().from(schema.faviconMedia).where(eq(schema.faviconMedia.id, faviconId)).get();
+    if (favicon) {
+      res.json({ url: favicon.mediaUrl });
+      return;
+    }
+  }
+  res.json({ url: null });
+});
+
+router.post('/favicon-media', authMiddleware, (req, res) => {
+  const result = db.insert(schema.faviconMedia).values(req.body).returning().get();
+  res.status(201).json(result);
+});
+
+router.put('/favicon-media/:id/activate', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id as string);
+  const media = db.select().from(schema.faviconMedia).where(eq(schema.faviconMedia.id, id)).get();
+  if (!media) {
+    res.status(404).json({ error: 'Favicon not found' });
+    return;
+  }
+  const existing = db.select().from(schema.siteSettings).where(eq(schema.siteSettings.key, 'activeFaviconId')).get();
+  if (existing) {
+    db.update(schema.siteSettings).set({ value: String(id) }).where(eq(schema.siteSettings.id, existing.id)).run();
+  } else {
+    db.insert(schema.siteSettings).values({ key: 'activeFaviconId', value: String(id) }).run();
+  }
+  res.json({ success: true });
+});
+
+router.delete('/favicon-media/:id', authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id as string);
+  const setting = db.select().from(schema.siteSettings).where(eq(schema.siteSettings.key, 'activeFaviconId')).get();
+  if (setting && setting.value === String(id)) {
+    db.update(schema.siteSettings).set({ value: '' }).where(eq(schema.siteSettings.id, setting.id)).run();
+  }
+  db.delete(schema.faviconMedia).where(eq(schema.faviconMedia.id, id)).run();
+  res.json({ success: true });
+});
+
 // ============ SITE SETTINGS ============
 router.get('/settings', (_req, res) => {
   const data = db.select().from(schema.siteSettings).all();

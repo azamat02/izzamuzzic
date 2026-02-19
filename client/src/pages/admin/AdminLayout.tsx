@@ -6,12 +6,13 @@ import {
   HiOutlineShoppingBag, HiOutlineClipboardList,
   HiOutlineMail, HiOutlineGlobe, HiOutlineMenu as HiOutlineNavigation,
   HiOutlineCog, HiOutlineLogout, HiOutlineX, HiMenu, HiOutlineFilm,
-  HiOutlineColorSwatch,
+  HiOutlineColorSwatch, HiOutlineCursorClick,
 } from 'react-icons/hi';
 
 const navItems = [
   { label: 'Dashboard', path: '/admin', icon: HiOutlineHome, end: true },
   { label: 'Logo', path: '/admin/logo', icon: HiOutlineColorSwatch },
+  { label: 'Favicon', path: '/admin/favicon', icon: HiOutlineCursorClick },
   { label: 'Hero', path: '/admin/hero', icon: HiOutlineFilm },
   { label: 'About', path: '/admin/about', icon: HiOutlineUser },
   { label: 'Releases', path: '/admin/releases', icon: HiOutlineMusicNote },
