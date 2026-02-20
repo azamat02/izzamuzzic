@@ -1,7 +1,10 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
+import type { ImageUploadOptions } from '../../lib/api';
 import { ImageUploader } from '../../components/admin/ImageUploader';
+import { CompressionModal } from '../../components/admin/CompressionModal';
+import type { CompressionSettings } from '../../components/admin/CompressionModal';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
 import { useToast } from '../../components/admin/Toast';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck, HiOutlineX, HiOutlinePhotograph } from 'react-icons/hi';
@@ -22,6 +25,7 @@ export function GalleryEditor() {
   const [batchUploading, setBatchUploading] = useState(false);
   const [batchProgress, setBatchProgress] = useState({ done: 0, total: 0 });
   const batchInputRef = useRef<HTMLInputElement>(null);
+  const [pendingBatchFiles, setPendingBatchFiles] = useState<FileList | null>(null);
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -139,7 +143,7 @@ export function GalleryEditor() {
     setSelectedIds(new Set());
   };
 
-  const handleBatchUpload = async (files: FileList) => {
+  const handleBatchUpload = async (files: FileList, options?: ImageUploadOptions) => {
     const total = files.length;
     setBatchUploading(true);
     setBatchProgress({ done: 0, total });
@@ -148,7 +152,7 @@ export function GalleryEditor() {
 
     const uploads = Array.from(files).map(async (file, i) => {
       try {
-        const result = await api.uploadFile(file);
+        const result = await api.uploadFile(file, options);
         await api.post('/gallery', {
           src: result.url,
           alt: file.name,
@@ -163,6 +167,20 @@ export function GalleryEditor() {
     await queryClient.invalidateQueries({ queryKey: ['gallery'] });
     setBatchUploading(false);
     toast(`${total} image${total > 1 ? 's' : ''} uploaded`);
+  };
+
+  const handleBatchFileSelect = (files: FileList) => {
+    setPendingBatchFiles(files);
+  };
+
+  const handleBatchCompressionConfirm = (settings: CompressionSettings) => {
+    if (pendingBatchFiles) {
+      const options: ImageUploadOptions | undefined = settings.compress
+        ? { compressQuality: settings.quality, compressMaxWidth: settings.maxWidth }
+        : undefined;
+      handleBatchUpload(pendingBatchFiles, options);
+    }
+    setPendingBatchFiles(null);
   };
 
   if (isLoading) {
@@ -220,7 +238,7 @@ export function GalleryEditor() {
                 className="hidden"
                 onChange={(e) => {
                   if (e.target.files && e.target.files.length > 0) {
-                    handleBatchUpload(e.target.files);
+                    handleBatchFileSelect(e.target.files);
                   }
                   e.target.value = '';
                 }}
@@ -274,6 +292,7 @@ export function GalleryEditor() {
               <ImageUploader
                 value={editForm.src}
                 onChange={(url) => setEditForm({ ...editForm, src: url })}
+                enableCompression
               />
             </div>
             <div className="space-y-4">
@@ -337,6 +356,7 @@ export function GalleryEditor() {
                   <ImageUploader
                     value={editForm.src}
                     onChange={(url) => setEditForm({ ...editForm, src: url })}
+                    enableCompression
                   />
                 </div>
                 <div className="mb-4">
@@ -434,6 +454,13 @@ export function GalleryEditor() {
         confirmLabel="Delete"
         onConfirm={confirmModal.onConfirm}
         onCancel={() => setConfirmModal((prev) => ({ ...prev, open: false }))}
+      />
+
+      <CompressionModal
+        open={!!pendingBatchFiles}
+        file={pendingBatchFiles?.[0] ?? null}
+        onConfirm={handleBatchCompressionConfirm}
+        onCancel={() => setPendingBatchFiles(null)}
       />
     </div>
   );
