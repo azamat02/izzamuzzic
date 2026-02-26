@@ -22,7 +22,7 @@ interface GalleryResponse {
   limit: number;
 }
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 52;
 
 export function GalleryPage() {
   const [page, setPage] = useState(1);

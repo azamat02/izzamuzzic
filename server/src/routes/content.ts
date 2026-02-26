@@ -109,7 +109,7 @@ router.put('/music-settings', authMiddleware, (req, res) => {
 // ============ GALLERY ============
 router.get('/gallery', (req, res) => {
   const page = Math.max(1, parseInt(req.query.page as string) || 1);
-  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 52));
   const offset = (page - 1) * limit;
 
   const items = db.select().from(schema.galleryImages)

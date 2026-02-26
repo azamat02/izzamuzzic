@@ -43,7 +43,7 @@ export function About() {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="absolute -bottom-4 -right-4 w-32 h-32 border-2 border-[var(--color-accent)] rounded-lg -z-10" />
+
           </motion.div>
 
           <motion.div
