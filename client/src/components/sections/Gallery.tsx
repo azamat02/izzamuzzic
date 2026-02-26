@@ -11,11 +11,17 @@ interface GalleryImage {
   sortOrder: number;
 }
 
+interface GalleryResponse {
+  items: GalleryImage[];
+  total: number;
+}
+
 export function Gallery() {
-  const { data: images } = usePublicData<GalleryImage[]>('gallery', '/gallery');
+  const { data } = usePublicData<GalleryResponse>('gallery-home', '/gallery?limit=6');
   const { data: settings } = usePublicData<Record<string, string>>('settings', '/settings');
 
-  const displayImages = (images || []).slice(0, 6);
+  const displayImages = data?.items || [];
+  const totalImages = data?.total ?? 0;
 
   return (
     <section id="gallery" className="py-24 bg-[#141414] w-full">
@@ -56,7 +62,7 @@ export function Gallery() {
           ))}
         </div>
 
-        {(images || []).length > 6 && (
+        {totalImages > 6 && (
           <div className="text-center mt-8">
             <Link
               to="/gallery"

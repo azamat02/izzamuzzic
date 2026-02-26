@@ -41,7 +41,10 @@ export function GalleryEditor() {
 
   const { data: images = [], isLoading } = useQuery({
     queryKey: ['gallery'],
-    queryFn: () => api.get<GalleryImage[]>('/gallery'),
+    queryFn: async () => {
+      const res = await api.get<{ items: GalleryImage[]; total: number }>('/gallery?limit=10000');
+      return res.items;
+    },
   });
 
   const createMutation = useMutation({

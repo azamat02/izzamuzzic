@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db, schema } from '../db/index.js';
-import { eq, asc, desc } from 'drizzle-orm';
+import { eq, asc, desc, sql } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
@@ -107,9 +107,21 @@ router.put('/music-settings', authMiddleware, (req, res) => {
 });
 
 // ============ GALLERY ============
-router.get('/gallery', (_req, res) => {
-  const data = db.select().from(schema.galleryImages).orderBy(asc(schema.galleryImages.sortOrder)).all();
-  res.json(data);
+router.get('/gallery', (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page as string) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
+  const offset = (page - 1) * limit;
+
+  const items = db.select().from(schema.galleryImages)
+    .orderBy(asc(schema.galleryImages.sortOrder))
+    .limit(limit)
+    .offset(offset)
+    .all();
+
+  const countResult = db.select({ count: sql<number>`count(*)` }).from(schema.galleryImages).get();
+  const total = countResult?.count ?? 0;
+
+  res.json({ items, total, page, limit });
 });
 
 router.post('/gallery', authMiddleware, (req, res) => {

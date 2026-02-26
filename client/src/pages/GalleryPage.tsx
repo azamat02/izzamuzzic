@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import { SectionTitle } from '../components/ui/SectionTitle';
 import { Lightbox } from '../components/ui/Lightbox';
-import { usePublicData } from '../hooks/useApi';
 import { getThumbnailUrl } from '../lib/image';
+import { api } from '../lib/api';
 
 interface GalleryImage {
   id: number;
@@ -14,11 +15,39 @@ interface GalleryImage {
   sortOrder: number;
 }
 
-export function GalleryPage() {
-  const { data: images } = usePublicData<GalleryImage[]>('gallery', '/gallery');
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+interface GalleryResponse {
+  items: GalleryImage[];
+  total: number;
+  page: number;
+  limit: number;
+}
 
-  const allImages = images || [];
+const PAGE_SIZE = 50;
+
+export function GalleryPage() {
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<GalleryResponse>({
+    queryKey: ['gallery-page'],
+    queryFn: ({ pageParam }) =>
+      api.get<GalleryResponse>(`/gallery?page=${pageParam}&limit=${PAGE_SIZE}`),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const loaded = lastPage.page * lastPage.limit;
+      return loaded < lastPage.total ? lastPage.page + 1 : undefined;
+    },
+    staleTime: 60 * 1000,
+  });
+
+  const allImages = useMemo(
+    () => data?.pages.flatMap((p) => p.items) ?? [],
+    [data],
+  );
+
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   return (
     <motion.div
@@ -62,6 +91,18 @@ export function GalleryPage() {
               </motion.div>
             ))}
           </div>
+
+          {hasNextPage && (
+            <div className="text-center mt-12">
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="inline-block border border-white/30 text-white text-sm uppercase tracking-wider px-8 py-3 rounded-lg hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isFetchingNextPage ? 'Loading...' : 'Load More'}
+              </button>
+            </div>
+          )}
         </div>
       </main>
       <Footer />
