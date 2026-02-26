@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import { SectionTitle } from '../components/ui/SectionTitle';
@@ -25,29 +25,23 @@ interface GalleryResponse {
 const PAGE_SIZE = 50;
 
 export function GalleryPage() {
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery<GalleryResponse>({
-    queryKey: ['gallery-page'],
-    queryFn: ({ pageParam }) =>
-      api.get<GalleryResponse>(`/gallery?page=${pageParam}&limit=${PAGE_SIZE}`),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      const loaded = lastPage.page * lastPage.limit;
-      return loaded < lastPage.total ? lastPage.page + 1 : undefined;
-    },
+  const [page, setPage] = useState(1);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const { data } = useQuery<GalleryResponse>({
+    queryKey: ['gallery-page', page],
+    queryFn: () => api.get<GalleryResponse>(`/gallery?page=${page}&limit=${PAGE_SIZE}`),
     staleTime: 60 * 1000,
   });
 
-  const allImages = useMemo(
-    () => data?.pages.flatMap((p) => p.items) ?? [],
-    [data],
-  );
+  const images = data?.items ?? [];
+  const totalPages = data ? Math.ceil(data.total / data.limit) : 1;
 
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    setLightboxIndex(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <motion.div
@@ -61,7 +55,7 @@ export function GalleryPage() {
           <SectionTitle title="GALLERY" subtitle="Behind the scenes and live moments" />
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {allImages.map((image, index) => (
+            {images.map((image, index) => (
               <motion.div
                 key={image.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -92,16 +86,12 @@ export function GalleryPage() {
             ))}
           </div>
 
-          {hasNextPage && (
-            <div className="text-center mt-12">
-              <button
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                className="inline-block border border-white/30 text-white text-sm uppercase tracking-wider px-8 py-3 rounded-lg hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isFetchingNextPage ? 'Loading...' : 'Load More'}
-              </button>
-            </div>
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           )}
         </div>
       </main>
@@ -109,12 +99,77 @@ export function GalleryPage() {
 
       {lightboxIndex !== null && (
         <Lightbox
-          images={allImages}
+          images={images}
           currentIndex={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onNavigate={setLightboxIndex}
         />
       )}
     </motion.div>
+  );
+}
+
+function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  const getPageNumbers = () => {
+    const pages: (number | 'ellipsis')[] = [];
+
+    pages.push(1);
+
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+
+    if (start > 2) pages.push('ellipsis');
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < totalPages - 1) pages.push('ellipsis');
+
+    if (totalPages > 1) pages.push(totalPages);
+
+    return pages;
+  };
+
+  return (
+    <div className="flex items-center justify-center gap-2 mt-12">
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="px-3 py-2 text-sm text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+      >
+        &larr;
+      </button>
+
+      {getPageNumbers().map((item, i) =>
+        item === 'ellipsis' ? (
+          <span key={`e${i}`} className="px-2 text-white/30">...</span>
+        ) : (
+          <button
+            key={item}
+            onClick={() => onPageChange(item)}
+            className={`min-w-[40px] h-10 rounded-lg text-sm transition-colors ${
+              item === currentPage
+                ? 'bg-[var(--color-accent)] text-white'
+                : 'text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            {item}
+          </button>
+        ),
+      )}
+
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="px-3 py-2 text-sm text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+      >
+        &rarr;
+      </button>
+    </div>
   );
 }
